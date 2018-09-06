@@ -1,0 +1,1 @@
+# Bayesian applied regression models {#day2}

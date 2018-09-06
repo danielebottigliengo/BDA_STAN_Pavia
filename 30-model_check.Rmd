@@ -1,0 +1,1 @@
+# Model checking, model comparison and model selection/averaging {#day3}
