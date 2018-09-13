@@ -32,15 +32,15 @@ generated quantities {
   int complaints[N];
 
   // Generate parameters values from the prior predictive distribution
-  real alpha = normal_rng(log(4), 1);
-  real beta = normal_rng(-0.25, 1);
-  real beta_super = normal_rng(-0.5, 1);
+  real alpha = normal_rng(log(4), 0.1);
+  real beta = normal_rng(-0.25, 0.1);
+  real beta_super = normal_rng(-0.5, 0.1);
 
   // Generate simulated values of the outcome (number of complaints)
   for(n in 1:N) {
 
     // Generate fake data
-    log_sq_foot[n] = normal_rng(1.5, 1);
+    log_sq_foot[n] = normal_rng(1.5, 0.1);
     live_in_super[n] = bernoulli_rng(0.5);
     n_traps[n] = poisson_rng(8);
 

@@ -29,6 +29,11 @@ humans obtaining nicer output.
 ```{r setup, message=FALSE, warning=FALSE}
 # Packages for the analyses
 library(rstan)                                     # R interface to Stan
+# For execution on a local, multicore CPU with excess RAM 
+options(mc.cores = parallel::detectCores() - 1)
+# To avoid recompilation of unchanged Stan programs
+rstan_options(auto_write = TRUE)
+library(bayesplot)
 
 # Package(s) for data management 
 library(tidyverse)            # Imports the principal tidyverse packages
@@ -52,7 +57,7 @@ all the packages references we have loaded.
 knitr::write_bib(
   c(
     .packages(), 'bookdown', 'knitr', 'rmarkdown', 'knitr',
-    'tidyverse', 'rstan'
+    'tidyverse', 'rstan', "bayesplot"
   ),
   file = 'packages.bib'
 )

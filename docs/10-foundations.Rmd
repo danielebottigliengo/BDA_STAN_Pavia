@@ -218,7 +218,7 @@ distribution of the parameter
 For every problem we face, we don't need to be afraid to used complex
 models with lot of parameters. Complicated models that reflect our
 uncertainty in the problem at hand are needed to correctly support
-decision-making process \@ref(draper1995).
+decision-making process \@draper1995.
 
 Let's now load the data and look at the variables.
 
@@ -247,7 +247,7 @@ ggplot(
   theme_bw()
 ```
 
-Let's plot the number of complaints for different apartment across
+Let's plot the number of complaints for different buildings across
 the months during which traps were settled. Colors
 refer to apartment in different levels of the building.
 
@@ -292,7 +292,7 @@ ggplot(
 ```
 
 We can see that there's lot of variation in the number of complaints
-both across apartment and level of the building.
+both across bulding and level of the apartment in the building.
 
 How many zeros are present in the data? 
 
@@ -327,9 +327,8 @@ $$
 
 Number of complaints are modeled as count data with Poisson regression,
 where $b$ is the number of apartment and $t$ is the month. As we
-mentioned above, we will start by modeling mean and variance will be
-assuming they are constant across aparments and building lvels, which 
-is a very restrictive assumption.
+mentioned above, we will start by assuming constant mean and variance 
+across buildings, which is a very restrictive assumption.
 
 Let's now fit the model. First we need to pass the data to the
 stan object as a list, declaring the number of observation, the 
@@ -364,7 +363,7 @@ of interest that she wants to simulated given the posterior distribution
 of the model (predictive or future values, missing data, ecc.)
 
 Let's start to write the Stan program of our model. 
-```{stan, output.var = "code example"}
+```{stan, output.var = "simple_poisson_comp"}
 data {
   int<lower = 1> N;                     // number of observation
   vector<lower = 0>[N] n_traps;         // number of traps
@@ -384,6 +383,7 @@ model {
   /*Let's declare our outcome variable and its pdf. Poisson_log
   function directly exponentiated the linear prediction*/
   target += poisson_log_lpmf(complaints | eta);
+  
   /*or equivalently
 
   complaints ~ poisson_log(eta);
@@ -395,6 +395,7 @@ model {
   there will be less complaints from people living in the building.*/
   target += normal_lpdf(alpha | log(4), 1) +
             normal_lpdf(beta | -0.25, 1);
+            
   /*or equivalently
 
   alpha ~ normal(log(4), 1);
@@ -467,8 +468,17 @@ separate file and call it into the _stan_ function.
 # A seed for reproducibility of the draws from the posterior
 mcmc_seed <- 140509
 
-simple_poisson <- stan(
-  file = "stan_programs/simple_poisson.stan",
+# The command to compile the model has been commented given that
+# markdown automatically calls Stan once a Stan program is inserted
+# into a chunk. So the model has been already compiled.
+
+# # Compile the model in C++
+# simple_poisson_comp <- stan_model(
+#   file = "stan_programs/simple_poisson.stan"
+# )
+
+simple_poisson <- sampling(
+  simple_poisson_comp,
   data = pest_data_list,
   chains = 1L,        # One chain for a quick sampling
   seed = mcmc_seed

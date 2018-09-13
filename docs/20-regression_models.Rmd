@@ -1,7 +1,7 @@
 # Bayesian applied regression models {#day2}
 
 ## Posterior predictive checks
-Posterior predictive check is a fundamental step of the Bayesia
+Posterior predictive check is a fundamental step of the Bayesian
 workflow to check if the fitted model makes sense. It basically
 works by simulating replicated data from the fitted model and by 
 comparing them to the observed data. 
@@ -11,9 +11,9 @@ should arise:
 * Are the simulated data plausible with the real data? 
 * Does our model make sense with our situation?
 
-Simulating fake data from the fitted means that we must draw values
-from the posterior distribution of unknown but observable outcome data,
-i.e.
+Simulating fake data from the fitted model means that we must draw 
+values from the posterior distribution of unknown but observable 
+outcome data, i.e.
 
 \begin{equation}
 
@@ -33,7 +33,7 @@ as follows:
 
 If there are differences between the posterior predictive distribution
 and the empirical distribution of the observed data it means that
-the model isn't able of describing our data and it is probably
+the model isn't able to accurately describe our data and it is probably
 misfitting or overfitting. How can we inspect these discrepancies?
   
 * Graphical posterior predictive checks are a valuable tool to assess 
@@ -44,12 +44,13 @@ misfitting or overfitting. How can we inspect these discrepancies?
   mean from the data simulated with our model.
 
 * In posterior predictive distribution we have many sources of
-uncertainty: about the parameters, given by the posterior distribution
+uncertainty: about the parameters, given by the posterior distribution,
 and about the data, given by their variation and their noise.
 
-_In posterior predictive check  is used to see if the simulated data range among plausible value. Thus, we don't want that the simulated
-data perfectly resemble the observed data, otherwise our model we
-are running into some overfitting problems._
+_Posterior predictive check is used to see if the simulated data range 
+among plausible value. Thus, we don't want that the simulated
+data perfectly resemble the observed data, otherwise our model is
+very likely overfitting._
 
 Let's come back to the case study of the pest control of apartment
 buildings. We are going to perform some posterior predictive checks to
@@ -58,8 +59,8 @@ understand the implications of our simple poisson regression.
 To simulate replicated data from our model we need to add the
 _generated quantities_ block in the Stan program.
 
-```{stan, output.var = "code_example_simple_poisson_gen_quant"}
-/* Simple Poisson model*/
+```{stan, output.var = "simple_poisson_gen_quant_comp"}
+/* Simple Poisson model generated quantities*/
 
 /*
 * Alternative to poisson_log_rng() that
@@ -116,18 +117,15 @@ generated quantities {
 }
 ```
 
-
 Now we generate posterior predictive values from our model and store
 them into a matrix.
 
 ```{r}
-# A seed for reproducibility
-mcmc_seed <- 140509
-
-simple_poisson_gen_quant <- stan(
-  file = "stan_programs/simple_poisson_gen_quant.stan",
+# Sampling from the posterior
+simple_poisson_gen_quant <- sampling(
+  simple_poisson_gen_quant_comp,
   data = pest_data_list,
-  chains = 1L,
+  chains = 4L,             
   warmup = 1000L,
   iter = 2000L,
   seed = mcmc_seed
@@ -162,7 +160,7 @@ ppc_dens_overlay(
 ```
 
 As we can see, simulated data from our model do not resemble very well
-the distribution of our model.
+the distribution of the observed data.
 
 We can also compare some statistics. Given our example, zero complaints
 is a value of interest for the manager of the company, because it
@@ -181,6 +179,9 @@ ppc_stat(
   stat = "prop_zero_fun"
 )
 ```
+
+The graph above clearly shows that our model tends to underestimate the
+proportion of zero complaints.
 
 We can also plot the stanrdized values of the differences between
 the observed number of complaints and the predicted number of
@@ -211,6 +212,15 @@ ppc_rootogram(
 )
 ```
 
+If the model had a good fit, we would had observed similar expected
+and observed count. However, we can see that our model tends to 
+overestimate when there is a medium number of complaints, whereas it
+underestimates when there are few or lager complaints.
+
+We can further inspect our model by comparing the observed and predicted
+number of complaints (with relative uncertainty) across the number of
+traps.
+
 ```{r}
 ppc_intervals(
   y = pest_data$complaints, 
@@ -223,15 +233,18 @@ ppc_intervals(
   )
 ```
 
+We can observe that our model predicts very badly the extreme of the 
+data, i.e. few and large number of complaints.
+
 Graphical posterior predictive checks inform us that the model may
 not be a good choice for our problem at hand. We need to criticize
 our model and understand if some of assumptions we made can be
 revised. 
 
-For example, apartments may be very different from
-each other and it is better to incorporate this information in the
-model. To see if that makes sense, we can plot the relationship between
-the squared foot of the building and the number of complaints.
+For example, building may be very different from each other and it is 
+better to incorporate this information in the model. To see if that 
+makes sense, we can plot the relationship between the squared foot of 
+the building and the number of complaints.
 
 ```{r}
 ggplot(
@@ -255,8 +268,8 @@ to a higher number of roaches, and thus more complaints. We can
 think the size of the aparment as an initial exposure that likely
 influnce the number of complaints and we can add it in the model as an
 offset. Moreover, we can also take into account the level of the
-apartment. Here we are going to rescale the square foot measure such 
-that it is on a unit scale to make computation more feasible.
+apartment in the building. Here we are going to rescale the square foot
+measure such that it is on a unit scale making computation more feasible.
 
 ```{r}
 pest_data$log_sq_foot <- log(pest_data$total_sq_foot/1e4)
@@ -268,7 +281,7 @@ by writing in the program the number of simulated observation in the
 data block and declaring the priors and the simulated data in the
 generated quantities block.
 
-```{stan, output.var = "code_example_multi_poisson_dgp"}
+```{stan, output.var = "multi_poisson_dgp_comp"}
 /* Generating data from a multiple Poisson regression model*/
 
 /*
@@ -303,15 +316,15 @@ generated quantities {
   int complaints[N];
 
   // Generate parameters values from the prior predictive distribution
-  real alpha = normal_rng(log(4), 1);
-  real beta = normal_rng(-0.25, 1);
-  real beta_super = normal_rng(-0.5, 1);
+  real alpha = normal_rng(log(4), 0.1);
+  real beta = normal_rng(-0.25, 0.1);
+  real beta_super = normal_rng(-0.5, 0.1);
 
   // Generate simulated values of the outcome (number of complaints)
   for(n in 1:N) {
 
     // Generate fake data
-    log_sq_foot[n] = normal_rng(1.5, 1);
+    log_sq_foot[n] = normal_rng(1.5, 0.1);
     live_in_super[n] = bernoulli_rng(0.5);
     n_traps[n] = poisson_rng(8);
 
@@ -327,14 +340,14 @@ generated quantities {
 We now simulate fake data from the model.
 
 ```{r}
-# Compile the model
-fake_pest_model <- stan_model(
-  file = "stan_programs/multiple_poisson_dgp.stan"
-)
+# # Compile the model
+# multi_poisson_dgp_comp <- stan_model(
+#   "stan_programs/multiple_poisson_dgp.stan"
+# )
 
 # Sampling from the posterior
-fake_pest_sampling <- sampling(
-  fake_pest_model,
+multi_poisson_dgp <- sampling(
+  multi_poisson_dgp_comp,
   data = list(N = nrow(pest_data)),
   chains = 1,
   cores = 1,
@@ -344,15 +357,220 @@ fake_pest_sampling <- sampling(
 )
 
 # Get the fake data
-fake_data_pest <- rstan::extract(fake_pest_sampling)
+fake_data_pest <- rstan::extract(multi_poisson_dgp)
 ```
 
+Now we prepare the data into a list to be passed to Stan. 
+
+```{r}
+# Take only numbers from the first iteration
+stan_fake_data <- list(
+  N = nrow(pest_data),
+  log_sq_foot = fake_data_pest$log_sq_foot[1, ],
+  live_in_super = fake_data_pest$live_in_super[1, ],
+  n_traps = fake_data_pest$n_traps[1, ],
+  complaints = fake_data_pest$complaints[1, ]
+)
+```
+
+And we fit our model to the fake data. If our model is able to recover
+the parameters the prior distribution of the parameters than it means
+that our model is reasonable and we can fit it to the real data. Below
+the Stan program of the model
+
+```{stan, output.var = "multi_poisson_comp"}
+/* Multi Poisson model*/
+
+/*
+* Alternative to poisson_log_rng() that
+* avoids potential numerical problems during warmup
+*/
+functions {
+  int poisson_log_safe_rng(real eta) {
+    real pois_rate = exp(eta);
+    if (pois_rate >= exp(20.79))
+      return -9;
+    return poisson_rng(pois_rate);
+  }
+}
+
+// Declare the structure of the data
+data {
+  int<lower = 1> N;                       // number of observation
+  vector<lower = 0>[N] n_traps;           // number of traps
+  int<lower = 0> complaints[N];           // number of complaints
+  vector[N] log_sq_foot;                  // log of square foot building
+  vector<lower = 0, upper = 1> live_in_super; // level of the apartment
+}
+
+// Declare the parameters of the model (the goal of our inferemce)
+parameters {
+  // Intercept and the slope of the linear predictor eta
+  real alpha;
+  real beta;
+  real beta_super;
+}
+
+// Define the structure of the Poisson model: priors and likelihood
+model {
+  // Let's create the linear predictor: eta
+  vector[N] eta = alpha + 
+                  beta * n_traps +
+                  beta_super * live_in_super +
+                  log_sq_foot;
+
+  /*Let's declare our outcome variable and its pdf. Poisson_log
+  function directly exponentiated the linear prediction*/
+  target += poisson_log_lpmf(complaints | eta);
+  /*or equivalently
+
+  complaints ~ poisson_log(eta);
+
+  */
+
+  /*Let's declare our priors distributions. Let's put some reasonable
+  priors. In particular, we expect that for higher number of traps
+  there will be less complaints from people living in the building.*/
+  target += normal_lpdf(alpha | log(4), 1) +
+            normal_lpdf(beta | -0.25, 1) +
+            normal_lpdf(beta_super | -0.5, 1);
+
+  /*or equivalently
+
+  alpha ~ normal(log(4), 1);
+  beta ~ normal(-0.25, 1);
+
+  */
+}
+
+// Simulate replicated data from the model
+generated quantities {
+
+  int y_rep[N];
+  
+  for (n in 1:N) {
+  
+    real eta_rep = alpha + 
+                   beta * n_traps[n] + 
+                   beta_super * live_in_super[n] +
+                   log_sq_foot;
+                   
+    y_rep[n] = poisson_log_safe_rng(eta_rep)
+  
+  }
+
+}
+
+```
+
+```{r}
+# Compile the model
+multi_poisson_comp <- stan_model(
+  "stan_programs/multiple_poisson_regression.stan"
+)
+
+# Sampling from the posterior
+multi_poisson_fake <- sampling(
+  object = multi_poisson_comp,
+  data = stan_fake_data,
+  chains = 4L,
+  warmup = 1000L,
+  iter = 2000L
+) 
+```
+
+Does the model recover the parameters of the prior?
+
+```{r}
+post_alpha_betas <- as.matrix(
+  multi_poisson_fake,
+  pars = c("alpha", "beta", "beta_super")
+)
+
+true_alpha_beta <- c(
+  fake_data_pest$alpha,
+  fake_data_pest$beta,
+  fake_data_pest$beta_super
+)
+
+mcmc_recover_hist(
+  x = post_alpha_betas,
+  true = true_alpha_beta
+)
+```
+
+Yes! Let's fit the model to the real data and do posterior predictive
+checks.
+
+```{r}
+# Prepare the data into a list
+pest_data_list_multi <- list(
+  N = nrow(pest_data),
+  n_traps = pest_data$traps,
+  log_sq_foot = sqrt(pest_data$total_sq_foot/1e4), # rescale to unit scale
+  live_in_super = pest_data$live_in_super,
+  complaints = pest_data$complaints
+)
+
+# Sampling from the posterior
+multi_poisson <- sampling(
+  multi_poisson_comp,
+  data = pest_data_list_multi,
+  chains = 4L,
+  warmup = 1000L,
+  iter = 2000L,
+  seed = mcmc_seed
+)
+```
+
+```{r}
+# Get replicated data
+y_rep <- as.matrix(
+  multi_poisson,
+  pars = c("y_rep")
+)
+
+# Posterior predictive checks
+ppc_dens_overlay(
+  y = pest_data$complaints, 
+  y_rep[1:200,]
+)
+```
+
+```{r}
+# Function that computes the proportion of zeros
+prop_zero_fun <- function(x) mean(x == 0)
+
+# Compare the proportions
+ppc_stat(
+  y = pest_data$complaints,
+  yrep = y_rep[1:200,],
+  stat = "prop_zero_fun"
+)
+```
+
+```{r}
+ppc_intervals(
+  y = pest_data$complaints, 
+  yrep = y_rep,
+  x = pest_data$traps
+) + 
+  labs(
+    x = "Number of traps", 
+    y = "Number of complaints"
+  )
+```
+
+The model still has some problems, in particular at the tails of the
+data: there is still an high number of complaints that our model is
+not able to account for.
 
 ### Negative Binomial model
 We may criticize the assumption of our model: constant mean and 
 variance across observations. We can use a negative binomial 
-distribution to model the number of complaints. The model can be
-formalized as follows:
+distribution to model the number of complaints allowing for 
+overdispersion, i.e. variance not constant across observations. 
+The model can be formalized as follows:
 
 $$
 \begin{align*}
@@ -363,7 +581,7 @@ $$
 \end{align*}
 $$
 
-In Stan the negative binomial mass function we'll use is called 
+We can write the negative binomial function in Stan as 
 $\texttt{neg_binomial_2_log}(\text{ints} \, y, \text{reals} \, \eta, \text{reals} \, \phi)$ in Stan. Like the `poisson_log` function, this
 negative binomial mass function that is parameterized in terms of its
 log-mean, $\eta$, but it also has a precision $\phi$ such that
@@ -383,10 +601,9 @@ the negative-binomial gets closer and closer to the Poisson.
 
 ## MCMC algorithms
 Once we have very complex model with high number of parameters it is
-very difficult to get an analytic approach to sample from the
-posterior distribution. 
-In such case, the posterior may be very complex and sampling from it
-becomes very complicated.
+very difficult to get an analytic approach to sample from the posterior
+distribution. In such case, the posterior may be very complex and 
+sampling from it becomes very complicated.
 
 Regarding our pest control examples, suppose we want to allow for
 different intercepts across buildings, or different slopes. Thus, the 
@@ -399,11 +616,22 @@ most important region of such distribution.
 How can we do when we have a very strange and complicated surface that
 we don't know how it looks like?
 
-Markov Chain Monte Carlo (MCMC) is useful tool to perform such
-exploration.
+Markov Chain Monte Carlo (MCMC) algorithms are useful tool to deal
+with such task. Stan samples from the posterior using the 
+Hamiltonian Monte Carlo (HMC) algorithm, in particular the efficient
+No-U Turn Sampler (NUTS). For further details on the algorithm, we
+highly suggest the following readings: Hoffman and Gelman (2014) 
+\@hoffman_gelman_2014 and Betancourt (2018)-. Here is a very nice
+example of [how HMC works](https://chi-feng.github.io/mcmc-demo/app.html#HamiltonianMC,banana).
 
+The algorithm may incurs in some problems during the sampling process.
+If the sampler was not able to explore the surface of the posterior,
+then we get biased inference. Thus, it is very important to diagnose
+the sampling process of the algorithm to look for potential patological
+behaviors that could interfer our final goal.
 
-Diagnose the sampling process of the algorithm is crucial to 
-understand if we can draw good inference.
+In the next lesson we will see how to build hierarchical models and
+how to diagnose the patological behaviours of the algorithm during
+the sampling.
 
 
