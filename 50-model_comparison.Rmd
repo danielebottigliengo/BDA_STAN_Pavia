@@ -1,0 +1,83 @@
+# Model comparison {#day5}
+How can we compare more fitted model to check which is the best?
+
+We want to assess how the models predict outcome values with new values.
+The most classical is to train a model on a set of data (training set)
+and validate the model on other set of data (validation set) on which
+we evaluate the predictive performance.
+
+In most situations we want to decide which model to use before collecting
+new data on which validate models. In such situations, we can make 
+some assumptions on the performance of the models if we would collect
+new data. We can make some assumptions on predictive density, which
+measures how surprisingly the data are compare with our model.
+Basically, when we have a new data point, the model tells us how the
+new value is reasonable given its assumptions. If we have new data,
+we can evaluate the average reasonability of the data given our model.
+
+We can get some measure performance even if we don't have a new data.
+Prediction on training set will be overconfident, because the model
+already knows the data on which it was trained.
+Model performance can be evaluated with the log pointwise predictive 
+density (lpd):
+
+$$
+lpd = \sum_{i = 1}^{n} \log \left( \frac{1}{S} \sum_{s = 1}^{S} p \left( y_{i} \vert \theta^{s} \right) \right)
+$$
+
+When we don't have new data, we have to use the observed values without
+being too confident on its associated predictive values, because we
+already use it.
+
+We can use the Leave-One-Out Cross-Validation (LOO-CV). Basically it
+trains the model on all the observed data but one. The left one 
+observation is used as validation set. We repeat this operation for all
+the data points and then we sum the log posterior density of all the
+data points. We can compare the difference of elpd between two models on 
+the data points to check how the models measure the plausibility of
+each data points and how the models predict the data points (maybe
+a model is able to better predict some data points than the other)
+
+The problem is that if the model is slow or if we have a lot of data
+points, fitting $n$ models is not feasible. How can we compute LOO-CV
+without fittin $n$ models?
+
+* fit the model once and then use Pareto Smoothed Importance Sampling
+  (PSIS-LOO)
+
+* A weight is associated to each observation and a Pareto distribution
+  is fitted to the weights.
+  
+* The largest weights with order statistics with Pareto distribution
+  are replaced.
+  
+* We assume that the posterior is not highly sensitive to leaving out
+  a single data point. 
+  
+* How would we know if such an assumption holds? Maybe there are
+  some observations which are relevant for the model.
+  
+* Based on the estimate of the shape parameter ($k$) of Pareto
+  distribution we can know if such assumption holds.
+  
+* For larger values of $k$ the __loo__ package gives some warnings,
+  telling us that some observations are very important for the model
+  and the posterior may be sensitive if leaving out those observations.
+  
+* If warnings are thrown out by the package, it means that PSIS is not
+  reliable in such situation.
+
+* For the problematic observations we can compute the lpd exactly by
+  fitting the model to all the other data and evaluate the elpd on the
+  particular observations.
+  
+Models are then compared by looking at their elpd. The one with higher
+value is the one that should be preferred in terms of predictive
+performance.
+
+
+
+
+
+
+

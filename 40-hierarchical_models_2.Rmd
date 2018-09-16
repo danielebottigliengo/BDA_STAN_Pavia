@@ -1,0 +1,981 @@
+# Hierarchical/Multilevel modeling (part 2) {#day4}
+
+## Varying intercept and varying slopes
+We retrieved more data and thus we have more number of time points 
+for each buildings we are considering. We can then add complexity to
+our model allowing for varying slopes (different effect of the number
+of traps for each building). The model with varying intercepts can
+be formalize as follows:
+
+$$
+\text{complaints}_{b,t} \sim \text{Neg-Binomial}(\lambda_{b,t}, \phi)  \\
+\lambda_{b,t} = \exp{(\eta_{b,t})}\\
+\eta_{b,t} = \mu_b + \kappa_b \, \texttt{traps}_{b,t} + \text{log_sq_foot}_b \\
+\mu_b \sim \text{Normal}(\alpha + \texttt{building_data} \, \zeta, \sigma_{\mu}) \\
+\kappa_b \sim \text{Normal}(\beta + \texttt{building_data} \, \gamma, \sigma_{\kappa})
+$$
+
+Now let's load the new dataset.
+
+```{r}
+pest_data_longer <- readRDS(
+  here::here(
+    "data/pest_data_longer_stan_dat.RDS"
+  )
+)
+```
+
+We will fit the non-centered parametrization version of the model with
+varying intercepts and slopes with. Here the code of the Stan program
+
+```
+// Hierarchical NB model with varying intercepts and slopes
+
+functions {
+  /*
+  * Alternative to neg_binomial_2_log_rng() that
+  * avoids potential numerical problems during warmup
+  */
+  int neg_binomial_2_log_safe_rng(real eta, real phi) {
+    real gamma_rate = gamma_rng(phi, phi / exp(eta));
+    if (gamma_rate >= exp(20.79))
+      return -9;
+
+    return poisson_rng(gamma_rate);
+  }
+}
+
+data {
+
+  int<lower=1> N;                     // number of observations
+  int<lower=0> complaints[N];         // number of complaints
+  vector<lower=0>[N] traps;           // number of traps
+  vector[N] log_sq_foot;              // vector of exposure (offset)
+
+  // building-level data
+  int<lower=1> K;                       // number of building-level covs
+  int<lower=1> J;                       // number of building
+  int<lower=1, upper=J> building_idx[N];// id of the building
+  matrix[J,K] building_data;            // building-level matrix
+
+}
+
+parameters {
+
+  real<lower=0> inv_phi;     // inverse of the parameter phi
+
+  // Non centered parameters for varying intercepts
+  vector[J] mu_raw;        // auxiliary parameter
+  real<lower=0> sigma_mu;  // sd of buildings-specific intercepts
+  real alpha;              // 'global' intercept for buildings
+  vector[K] zeta;          // coefficients on building-level predictors
+
+  // Non centered parameters for varying slopes
+  vector[J] kappa_raw;       // auxiliary parameter
+  real<lower=0> sigma_kappa; // sd of buildings-specific slopes
+  real beta;                 // 'global' slope on traps variable
+  vector[K] gamma;           // coefficients on building-level predictors
+
+}
+
+transformed parameters {
+
+  real phi = inv(inv_phi);  // original parameter phi
+
+  // Original parameters mu and kappa
+  vector[J] mu = alpha +
+                 building_data * zeta +
+                 sigma_mu * mu_raw;
+
+  vector[J] kappa = beta +
+                    building_data * gamma +
+                    sigma_kappa * kappa_raw;
+
+}
+
+model {
+
+  // Declare linear predictor Linear predictor
+  vector[N] eta = mu[building_idx] +
+                  kappa[building_idx] .* traps +
+                  log_sq_foot;
+
+  // Prior on inv_phi
+  target += normal_lpdf(inv_phi | 0, 1) +
+
+  // Prior on varying slopes parameters
+            normal_lpdf(kappa_raw | 0, 1) +
+            normal_lpdf(sigma_kappa | 0, 1) +
+            normal_lpdf(beta | -0.25, 1) +
+            normal_lpdf(gamma | 0, 1) +
+
+  // Prior on varying intercepts parameters
+            normal_lpdf(mu_raw | 0, 1) +
+            normal_lpdf(sigma_mu | 0, 1) +
+            normal_lpdf(alpha | log(4), 1) +
+            normal_lpdf(zeta | 0, 1);
+
+  // Likelihood
+  target += neg_binomial_2_log_lpmf(complaints | eta, phi);
+
+  // The symbol ".*" is element-wise multiplication to multiply
+  // the slope of each building for the number of traps of that building
+
+}
+
+generated quantities {
+
+  // Declare replicated data
+  int y_rep[N];
+
+  for (n in 1:N) {
+    real eta_n = mu[building_idx[n]] +
+                 kappa[building_idx[n]] * traps[n] +
+                 log_sq_foot[n];
+
+    y_rep[n] = neg_binomial_2_log_safe_rng(eta_n, phi);
+  }
+
+}
+```
+
+Fit the model to data and extract the posterior draws needed for
+our posterior predictive checks.
+
+```{r run-NB-hier-slopes}
+# Compile the model
+comp_model_NB_hier_slopes <- stan_model(
+  'stan_programs/hier_multiple_neg_bin_ncp_var_slopes.stan'
+)
+
+# Sampling from the posterior
+fitted_model_NB_hier_slopes <- sampling(
+    comp_model_NB_hier_slopes,
+    data = pest_data_longer,
+    warmup = 1000L,
+    iter = 2000L,
+    chains = 4, 
+    control = list(
+      adapt_delta = 0.99,  # Increase the step of the chains
+      max_treedepth = 15
+    ),
+    seed = mcmc_seed
+  )
+  
+```
+
+To see if the model infers building-to-building differences in, we can
+plot a histogram of our marginal posterior distribution for 
+`sigma_kappa`.
+
+```{r}
+mcmc_hist(
+  as.matrix(
+    fitted_model_NB_hier_slopes, 
+    pars = "sigma_kappa"
+  ),
+  binwidth = 0.005
+)
+```
+
+```{r}
+print(
+  fitted_model_NB_hier_slopes, 
+  pars = c('kappa','beta','alpha','phi','sigma_mu','sigma_kappa','mu')
+)
+```
+
+```{r}
+mcmc_hist(
+  as.matrix(
+    fitted_model_NB_hier_slopes, 
+    pars = "beta"
+  ),
+  binwidth = 0.005
+)
+```
+
+While the model can't specifically rule out zero from the posterior, 
+it does have mass at small non-zero numbers, so we should leave in the
+hierarchy over $\texttt{kappa}$. Plotting the marginal
+data density again, we can see the model still looks well calibrated.
+
+```{r ppc-full-hier-slopes}
+y_rep <- as.matrix(
+  fitted_model_NB_hier_slopes, 
+  pars = "y_rep"
+)
+
+ppc_dens_overlay(
+  y = pest_data_longer$complaints,
+  yrep = y_rep[1:200,]
+)
+```
+
+## Time varying effects and structured priors
+
+We haven't still inspect the trend of complaints over the time. We can
+check if there is any pattern by comparing the observed and posterior
+predictive average number of complaints over different months of the
+year.
+
+```{r ppc-group_max-hier-slopes-mean-by-mo}
+select_vec <- which(pest_data_longer$mo_idx %in% 1:12)
+
+ppc_stat_grouped(
+  y = pest_data_longer$complaints[select_vec],
+  yrep = y_rep[,select_vec],
+  group = pest_data_longer$mo_idx[select_vec],
+  stat = 'mean'
+) + 
+  xlim(0, 11)
+```
+
+Looking at the plot above, it seems that the average number of complaints
+increases over the time. Our model was not able to capture this feature
+of the data and it tend to overestimate the average number of 
+complaints for many months of the year.
+
+We can increase complexity in our model by adding a log-additive 
+monthly effect to capture trend over time with an Autoregressive
+(AR) model. We add into our model the term $\texttt{mo}_t$,
+
+$$
+\eta_{b,t} = \mu_b + \kappa_b \, \texttt{traps}_{b,t} + \texttt{mo}_t + \text{log_sq_foot}_b
+$$
+
+The change in the number of complaints over the time can be influenced
+by several factors. It is possible that more roaches are present during
+the summer as well as there is more roach control in the same season.
+It is plausible to think that maybe residents are more vigilant after
+the first sighting of roaches in the building, leading to an increase
+in the number of complaints.
+
+This can be a motivation for using an autoregressive prior for our 
+monthly effects. With such model we are evaluating the possibility
+that the number of complaints in a month is related to the number of
+complaints in the previous month. The model s as follows:
+
+$$
+\texttt{mo}_t \sim \text{Normal}(\rho \, \texttt{mo}_{t-1}, \sigma_\texttt{mo}) \\
+\equiv \\
+\texttt{mo}_t = \rho \, \texttt{mo}_{t-1} +\epsilon_t , \quad \epsilon_t \sim \text{Normal}(0, \sigma_\texttt{mo}) \\
+\quad \rho \in [-1,1]
+$$
+
+This equation says that the monthly effect in month $t$ is directly
+related to the last month's monthly effect. Given the description of 
+the process above, it seems like there could be either positive or
+negative associations between the months, but there should be a bit more
+weight placed on positive $\rho$s, so we'll put an informative prior 
+that pushes the parameter $\rho$ towards 0.5.
+
+Because Stan doesn't implement any densities that have support on 
+$[-1,1]$, we must use a variable transformation of a raw variable
+defined on $[0,1]$ before having the density on $\rho$ in $[-1,1]$,
+that is:
+
+$$
+\rho_{\text{raw}} \in [0, 1] \\
+\rho = 2 \times \rho_{\text{raw}} - 1
+$$
+
+In such a way, we can put a prior on $\rho_{raw}$ that pushes the
+estimate of $\rho$ toward $0.5$.
+
+Since we are working in a situation where the distribution of $mo_{t}$
+is conditional on $mo_{t-1}$, the prior on $mo_{t}$ should follow the
+same logic. But what kind of prior should we use for the first month,
+i.e. $mo_{1}$?
+
+For this first observation we need to find its marginal distribution.
+We can exploit the stationary nature of AR model, that says that for
+all $t$:
+
+$$
+E \left( mo_{t} \right) = E \left( mo_{t -1 } \right) \\
+Var \left( mo_{t} \right) = Var \left( mo_{t -1 } \right)
+$$
+
+Hence, the marginal distribution of $mo_{t}$ will be equal to the
+marginal distribution of $m_{t - 1}$.
+
+First we derive the marginal variance of $\texttt{mo}_{t}$.
+
+$$
+\text{Var}(\texttt{mo}_t) = \text{Var}(\rho \texttt{mo}_{t-1} + \epsilon_t)  \\
+\text{Var}(\texttt{mo}_t) = \text{Var}(\rho \texttt{mo}_{t-1}) + \text{Var}(\epsilon_t)
+$$
+
+The equality in the second line holds because of the independece
+between of $\epsilon_t$ and $\epsilon_{t-1})$. 
+
+Then, using the fact that $Var(cX) = c^2Var(X)$ for 
+a constant $c$ and that, by stationarity,
+$\textrm{Var}(\texttt{mo}_{t-1}) = \textrm{Var}(\texttt{mo}_{t})$,
+we get:
+
+$$
+\text{Var}(\texttt{mo}_t)= \rho^2 \text{Var}( \texttt{mo}_{t})  + \sigma_\texttt{mo}^2 \\
+\text{Var}(\texttt{mo}_t) = \frac{\sigma_\texttt{mo}^2}{1 - \rho^2}
+$$
+
+For the mean of $\texttt{mo}_t$:
+
+$$
+\mathbb{E}(\texttt{mo}_t) = \mathbb{E}(\rho \, \texttt{mo}_{t-1} + \epsilon_t) \\
+\mathbb{E}(\texttt{mo}_t) = \mathbb{E}(\rho \, \texttt{mo}_{t-1}) + \mathbb{E}(\epsilon_t) \\
+$$
+
+Since $\mathbb{E}(\epsilon_t) = 0$ by assumption we have
+
+$$
+\mathbb{E}(\texttt{mo}_t) = \mathbb{E}(\rho \, \texttt{mo}_{t-1})  + 0\\
+\mathbb{E}(\texttt{mo}_t) = \rho \, \mathbb{E}(\texttt{mo}_{t}) \\
+\mathbb{E}(\texttt{mo}_t) - \rho \mathbb{E}(\texttt{mo}_t) = 0  \\
+\mathbb{E}(\texttt{mo}_t) = 0/(1 - \rho)
+$$
+
+which for $\rho \neq 1$ yields $\mathbb{E}(\texttt{mo}_{t}) = 0$.
+
+We thus get the marginal distribution for $\texttt{mo}_{t}$, which we 
+will use for $\texttt{mo}_1$. The AR model for $mo_{1}$ can be 
+specified as follows:
+
+$$
+\texttt{mo}_1 \sim \text{Normal}\left(0, \frac{\sigma_\texttt{mo}}{\sqrt{1 - \rho^2}}\right)
+$$
+
+Thus, the prior will have the following distribution:
+
+$$
+\texttt{mo}_t \sim \text{Normal}\left(\rho \, \texttt{mo}_{t-1}, \sigma_\texttt{mo}\right) \forall t > 1
+$$
+
+The Stan program of the last model is coded as follows:
+
+```
+// Hierarchical NB model with varying intercepts and slopes and
+// month effect
+
+functions {
+  /*
+  * Alternative to neg_binomial_2_log_rng() that
+  * avoids potential numerical problems during warmup
+  */
+  int neg_binomial_2_log_safe_rng(real eta, real phi) {
+    real gamma_rate = gamma_rng(phi, phi / exp(eta));
+    if (gamma_rate >= exp(20.79))
+      return -9;
+
+    return poisson_rng(gamma_rate);
+  }
+}
+
+data {
+  int<lower = 1> N;
+  int<lower = 0> complaints[N];
+  vector<lower = 0>[N] traps;
+
+  // 'exposure'
+  vector[N] log_sq_foot;
+
+  // building-level data
+  int<lower = 1> K;
+  int<lower = 1> J;
+  int<lower = 1, upper = J> building_idx[N];
+  matrix[J,K] building_data;
+
+  // month info
+  int<lower = 1> M;
+  int<lower = 1, upper = M> mo_idx[N];
+}
+parameters {
+  real<lower = 0> inv_phi;   // 1/phi (easier to think about prior for 1/phi instead of phi)
+
+  // Varying intercept for the buildings
+  vector[J] mu_raw;        // N(0,1) params for non-centered param of building-specific intercepts
+  real<lower = 0> sigma_mu;  // sd of buildings-specific intercepts
+  real alpha;              // 'global' intercept
+  vector[K] zeta;          // coefficients on building-level predictors in model for mu
+
+  // Varying slopes for the buildings
+  vector[J] kappa_raw;       // N(0,1) params for non-centered param of building-specific slopes
+  real<lower = 0> sigma_kappa; // sd of buildings-specific slopes
+  real beta;                 // 'global' slope on traps variable
+  vector[K] gamma;           // coefficients on building-level predictors in model for kappa
+
+  // month-specific parameters
+  real<lower = 0,upper = 1> rho_raw;  // used to construct rho, the AR(1) coefficient
+  vector[M] mo_raw;
+  real<lower = 0> sigma_mo;
+}
+transformed parameters {
+  real phi = inv(inv_phi);
+
+  // non-centered parameterization of building-specific intercepts and slopes
+  vector[J] mu = alpha + building_data * zeta + sigma_mu * mu_raw;
+  vector[J] kappa = beta + building_data * gamma + sigma_kappa * kappa_raw;
+
+  // AR(1) process priors
+  real rho = 2.0 * rho_raw - 1.0;
+  vector[M] mo = sigma_mo * mo_raw;
+  mo[1] /= sqrt(1 - rho^2);   //   mo[1] = mo[1]/sqrt(1-rho^2)
+
+  // loop over the rest of the mo vector to add in the dependence on previous month
+  for(m in 2:M) {
+
+    mo[m] += rho * mo[m - 1];
+
+  }
+}
+model {
+
+  // Likelihood
+  vector[N] eta = mu[building_idx] +
+                  kappa[building_idx] .* traps +
+                  mo[mo_idx] +
+                  log_sq_foot;
+
+  target += neg_binomial_2_log_lpmf(complaints | eta, phi);
+
+  // Priors
+  target += normal_lpdf(inv_phi | 0, 1) +
+            // Priors on non-centered slopes
+            normal_lpdf(kappa_raw | 0, 1) +
+            normal_lpdf(sigma_kappa | 0, 1) +
+            normal_lpdf(beta | -0.25, 1) +
+            normal_lpdf(gamma | 0, 1) +
+            // Priors on non-centered intercepts
+            normal_lpdf(mu_raw | 0, 1) +
+            normal_lpdf(sigma_mu | 0, 1) +
+            normal_lpdf(alpha | log(4), 1) +
+            normal_lpdf(zeta | 0, 1) +
+            // Priors on non-centered months
+            beta_lpdf(rho_raw | 10, 5) +
+            normal_lpdf(mo_raw | 0, 1) +
+            normal_lpdf(sigma_mo | 0, 1);
+
+  // Alternative formulation
+  // inv_phi ~ normal(0, 1);
+  //
+  // kappa_raw ~ normal(0,1) ;
+  // sigma_kappa ~ normal(0, 1);
+  // beta ~ normal(-0.25, 1);
+  // gamma ~ normal(0, 1);
+  //
+  // mu_raw ~ normal(0,1) ;
+  // sigma_mu ~ normal(0, 1);
+  // alpha ~ normal(log(4), 1);
+  // zeta ~ normal(0, 1);
+  //
+  // rho_raw ~ beta(10, 5);
+  // mo_raw ~ normal(0, 1);
+  // sigma_mo ~ normal(0, 1);
+  //
+  // complaints ~ neg_binomial_2_log(mu[building_idx] +
+  //                                kappa[building_idx] .* traps +
+  //                                mo[mo_idx] +
+  //                                log_sq_foot,
+  //                                phi);
+
+}
+generated quantities {
+  int y_rep[N];
+  for (n in 1:N) {
+    real eta_n =
+      mu[building_idx[n]] +
+      kappa[building_idx[n]] * traps[n] +
+      mo[mo_idx[n]] +
+      log_sq_foot[n];
+
+    y_rep[n] = neg_binomial_2_log_safe_rng(eta_n, phi);
+  }
+}
+
+
+```
+
+
+Let's compile the model
+
+```{r}
+comp_model_NB_hier_mos <- stan_model(
+  'stan_programs/hier_multiple_neg_bin_ncp_var_slopes_mon.stan'
+)
+```
+
+and run the algorithm to sample from the posterior.
+
+```{r}
+fitted_model_NB_hier_mos <- sampling(
+    comp_model_NB_hier_mos,
+    data = pest_data_longer,
+    warmup = 1000L,
+    iter = 2000L,
+    chains = 4,
+    control = list(
+      adapt_delta = 0.95,
+      max_treedepth = 15
+    ),
+    seed = mcmc_seed
+)
+```
+
+Now we can print the parameters of the model.
+
+```{r}
+print(
+  fitted_model_NB_hier_mos, 
+  pars = c(
+    'kappa',
+    'beta',
+    'alpha',
+    'phi',
+    'sigma_mu',
+    'sigma_kappa',
+    'mu',
+    "zeta",
+    "mo",
+    "sigma_mo"
+  )
+)
+```
+
+In the interest of brevity, we won't go on expanding the model, though 
+we certainly could. What other information would help us understand the
+data generating process better? What other aspects of the data 
+generating process might we want to capture that we're not capturing 
+now?
+
+As usual, we run through our posterior predictive checks.
+
+```{r ppc-full-hier-mos}
+y_rep <- as.matrix(
+  fitted_model_NB_hier_mos, 
+  pars = "y_rep"
+)
+
+ppc_dens_overlay(
+  y = pest_data_longer$complaints,
+  yrep = y_rep[1:200,]
+)
+```
+
+```{r}
+select_vec <- which(pest_data_longer$mo_idx %in% 1:12)
+
+ppc_stat_grouped(
+  y = pest_data_longer$complaints[select_vec],
+  yrep = y_rep[,select_vec],
+  group = pest_data_longer$mo_idx[select_vec],
+  stat = 'mean'
+)
+```
+
+As we can see, our monthly varying intercept has captured a monthly
+pattern across all the buildings. We can also compare the prior and
+posterior for the autoregressive parameter to see how much we've 
+learned. Here are two different ways of comparing the prior and 
+posterior visually:
+
+```{r}
+# 1) compare draws from prior and draws from posterior
+rho_draws <- cbind(
+  2 * rbeta(4000, 10, 5) - 1, # draw from prior
+  as.matrix(
+    fitted_model_NB_hier_mos, 
+    pars = "rho"
+  )
+)
+
+colnames(rho_draws) <- c("prior", "posterior")
+
+mcmc_hist(
+  rho_draws, 
+  freq = FALSE, 
+  binwidth = 0.025,
+  facet_args = list(nrow = 2)
+) + 
+  xlim(-1, 1)
+
+
+# 2) overlay prior density curve on posterior draws
+gen_rho_prior <- function(x) {
+  alpha <- 10; beta <- 5
+  a <- -1; c <- 1
+  lp <- (alpha - 1) * log(x - a) +
+        (beta - 1) * log(c - x) -
+        (alpha + beta - 1) * log(c - a) -
+         lbeta(alpha, beta)
+  return(exp(lp))
+}
+
+mcmc_hist(
+  as.matrix(
+    fitted_model_NB_hier_mos, 
+    pars = "rho"
+  ),
+  freq = FALSE,
+  binwidth = 0.01
+) +
+  overlay_function(fun = gen_rho_prior) +
+  xlim(-1,1)
+```
+
+```{r}
+print(
+  fitted_model_NB_hier_mos, 
+  pars = c('rho','sigma_mu','sigma_kappa','gamma')
+)
+```
+
+```{r}
+ppc_intervals(
+  y = pest_data_longer$complaints,
+  yrep = y_rep,
+  x = pest_data_longer$traps
+) +
+  labs(
+    x = "Number of traps", 
+    y = "Number of complaints"
+  )
+```
+
+It looks as if our model finally generates a reasonable posterior
+predictive distribution for all numbers of traps, and appropriately
+captures the tails of the data generating process.
+
+## Use the model
+We can now use our model to help the company on the decision of the
+optimal number of traps to put in each building. We will make 
+predictions for $6$ months forward.
+
+Our revenue model needs to know how much revenue is lost due to the
+complaints. We know that the company for every $10$ complaints will
+call an exterminator agency that will cost around 100 euros, nearly
+10 euros per complaint.
+
+We now prepare the data for our model. We need to add in list to pass
+to the Stan program a vector with the number of traps for which we
+want to evaluate the number of complaints and the lost revenue for
+each complaints.
+
+```{r}
+# Number of hypothetical traps
+N_hypo_traps <- 21L
+hypo_traps <- seq(from = 0, to = 20, by = 1)
+
+# List with data to pass to Stan
+pest_data_longer[["N_hypo_traps"]] <- N_hypo_traps
+pest_data_longer[["hypo_traps"]] <- hypo_traps
+pest_data_longer[["lost_rev"]] <- 10
+```
+
+The Stan program has been coded as follows:
+
+```
+// Predictions using hierarchical NB model with varying intercepts
+// and slopes and month effect
+
+functions {
+  /*
+  * Alternative to neg_binomial_2_log_rng() that
+  * avoids potential numerical problems during warmup
+  */
+  int neg_binomial_2_log_safe_rng(real eta, real phi) {
+    real gamma_rate = gamma_rng(phi, phi / exp(eta));
+    if (gamma_rate >= exp(20.79))
+      return -9;
+
+    return poisson_rng(gamma_rate);
+  }
+}
+
+data {
+
+  int<lower = 1> N;
+  int<lower = 0> complaints[N];
+  vector<lower = 0>[N] traps;
+
+  // 'exposure'
+  vector[N] log_sq_foot;
+
+  // building-level data
+  int<lower = 1> K;     // number of building-level predictors
+  int<lower = 1> J;     // number of buildings
+  int<lower = 1, upper = J> building_idx[N]; // building id
+  matrix[J, K] building_data; // building-level matrix
+
+  // month info
+  int<lower = 1> M;
+  int<lower = 1, upper = M> mo_idx[N];
+
+  // To use in the generated quantities block
+  int<lower = 1> M_forward;
+  vector[J] log_sq_foot_pred;
+
+  // Number of traps used to predict number of complaints
+  int N_hypo_traps;
+  int hypo_traps[N_hypo_traps];
+
+  // Lost revenue for one complaint
+  real lost_rev;
+
+}
+
+parameters {
+
+  real<lower = 0> inv_phi;   // inverse of phi
+
+  // Varying intercept for the buildings
+  vector[J] mu_raw;        // auxiliary parameter
+  real<lower = 0> sigma_mu;// sd of buildings-specific intercepts
+  real alpha;              // 'global' intercept
+  vector[K] zeta;          // coefficients on building-level predictors
+
+  // Varying slopes for the buildings
+  vector[J] kappa_raw;       // auxiliary parameter
+  real<lower = 0> sigma_kappa; // sd of buildings-specific slopes
+  real beta;                 // 'global' slope on traps variable
+  vector[K] gamma;           // coefficients on building-level predictors
+
+  // month-specific parameters
+  real<lower = 0,upper = 1> rho_raw;  // used to construct rho
+  vector[M] mo_raw;
+  real<lower = 0> sigma_mo;
+
+}
+
+transformed parameters {
+
+  real phi = inv(inv_phi);    // original phi
+
+  // non-centered parameterization of building-specific
+  vector[J] mu = alpha +
+                 building_data * zeta +
+                 sigma_mu * mu_raw;
+
+  vector[J] kappa = beta +
+                    building_data * gamma +
+                    sigma_kappa * kappa_raw;
+
+  // AR(1) process priors
+  real rho = 2.0 * rho_raw - 1.0;
+  vector[M] mo = sigma_mo * mo_raw;
+  mo[1] /= sqrt(1 - rho^2);   //   mo[1] = mo[1]/sqrt(1-rho^2)
+
+  // add in the dependence on previous month
+
+  for(m in 2:M) {
+
+    mo[m] += rho * mo[m - 1];
+
+  }
+}
+
+model {
+
+  // Likelihood
+  vector[N] eta = mu[building_idx] +
+                  kappa[building_idx] .* traps +
+                  mo[mo_idx] +
+                  log_sq_foot;
+
+  target += neg_binomial_2_log_lpmf(complaints | eta, phi);
+
+  // Priors
+  target += normal_lpdf(inv_phi | 0, 1) +
+            // Priors on non-centered slopes
+            normal_lpdf(kappa_raw | 0, 1) +
+            normal_lpdf(sigma_kappa | 0, 1) +
+            normal_lpdf(beta | -0.25, 1) +
+            normal_lpdf(gamma | 0, 1) +
+            // Priors on non-centered intercepts
+            normal_lpdf(mu_raw | 0, 1) +
+            normal_lpdf(sigma_mu | 0, 1) +
+            normal_lpdf(alpha | log(4), 1) +
+            normal_lpdf(zeta | 0, 1) +
+            // Priors on non-centered months
+            beta_lpdf(rho_raw | 10, 5) +
+            normal_lpdf(mo_raw | 0, 1) +
+            normal_lpdf(sigma_mo | 0, 1);
+
+}
+
+generated quantities {
+
+  /*  we'll predict number of complaints and revenue lost for each
+  building at each hypothetical number of traps for M_forward months in
+  the future*/
+
+  int y_pred[J, N_hypo_traps];
+  matrix[J, N_hypo_traps] rev_pred;
+
+  for (j in 1:J) {  // loop over buildings
+
+    for (i in 1:N_hypo_traps) {  // loop over hypothetical traps
+
+      int y_pred_by_month[M_forward]; // monthly predictions
+      vector[M_forward] mo_forward;   // number of month forward
+
+      // first future month depends on last observed month
+      mo_forward[1] = normal_rng(rho * mo[M], sigma_mo);
+
+      for (m in 2:M_forward) {
+
+        mo_forward[m] = normal_rng(rho * mo_forward[m-1], sigma_mo);
+
+      }
+
+      for (m in 1:M_forward) {
+        real eta = mu[j] +
+                   kappa[j] * hypo_traps[i] +
+                   mo_forward[m] +
+                   log_sq_foot_pred[j];
+
+        y_pred_by_month[m] = neg_binomial_2_log_safe_rng(eta, phi);
+
+      }
+
+      // Sum the number of complaints by month for each number of
+      // traps in each building
+      y_pred[j, i] = sum(y_pred_by_month);
+
+      /* We  were were told every 10 complaints has additional
+      exterminator cost of $100, so $10 lose per complaint.*/
+      rev_pred[j,i] = y_pred[j,i] * (-lost_rev);
+    }
+  }
+}
+
+```
+
+
+We fit the model and run the sampler.
+
+```{r}
+# Compile the model
+comp_model_rev <- stan_model(
+  file = "stan_programs/hier_multiple_neg_bin_ncp_var_slopes_mon_predict.stan"
+)
+
+# Sampling from the posterio
+fitted_model_rev <- sampling(
+  object = comp_model_rev,
+  data = pest_data_longer,
+  warmup = 1000L,
+  iter = 2000L,
+  chains = 4L,
+  control = list(
+    adapt_delta = 0.95,
+    max_treedepth = 15
+  ),
+  seed = mcmc_seed
+)
+```
+
+In our analysis, the cost of installing a bait station plays a key
+role and we need to understand the cost associated with maintaining 
+each bait station over the year. We know that the cost associated to
+the yearly maintaintion of a bait station is about 20 euros. 
+
+We must also account for the cost of the labor of maintaining the
+bait stations, which is needed every two months. If there are less than
+$5$ traps in the building, the cost for the maintaintion is about
+$20$ euros every two months. If the number of traps is greater than $5$,
+then the cost is about $30$ euros.
+
+Let's now create the vector of costs.
+
+```{r}
+N_traps <- 20L                  # Number of hypothetical traps
+costs <- 10 * (0:N_traps)       # Trap costs
+
+N_months_forward <- 12L              # Number of months to predict for
+N_months_labor <- N_months_forward/2 # Number of labor months
+
+# Hourly price of maintainance labor
+rate_low <- 20
+rate_high <- 30
+
+# Total costs
+costs <- costs +
+  (0:N_traps < 5 & 0:N_traps > 0) * (N_months_labor * rate_low) +
+  (0:N_traps >= 5 & 0:N_traps < 10) * (N_months_labor * (rate_low 
+  + 1 * rate_high)) +
+  (0:N_traps >= 10 & 0:N_traps < 15) * (N_months_labor * 
+  (rate_low + 2 * rate_high)) +
+  (0:N_traps >= 15) * (N_months_labor * (rate_low + 3 *
+  rate_high))
+```
+
+Now we plot the curves that related the number of traps and the
+associated money loss with relative uncertainty intervals.
+
+```{r}
+# extract as a list for convenience below
+samps_rev <- rstan::extract(fitted_model_rev)
+
+# total profit: revenues minus costs
+tot_profit <- sweep(
+  samps_rev$rev_pred, 
+  3, 
+  STATS = costs, 
+  FUN = '-'
+)
+
+# Median profit
+median_profit <- t(apply(tot_profit, c(2, 3), median))
+
+# lower and upper ends of 50% central interval
+lower_profit <- t(apply(tot_profit, c(2, 3), quantile, 0.25))
+upper_profit <- t(apply(tot_profit, c(2, 3), quantile, 0.75))
+
+profit_df <- data_frame(
+    profit = as.vector(median_profit),
+    lower = as.vector(lower_profit),
+    upper = as.vector(upper_profit),
+    traps = rep(0:N_traps, times = N_buildings),
+    building = rep(1:N_buildings, each = N_traps + 1)
+  )
+  
+ggplot(
+  data = profit_df, 
+  mapping = aes(
+    x = traps, 
+    y = profit
+  )
+) +
+  geom_ribbon(
+    mapping = aes(
+      ymin = lower, 
+      ymax = upper
+    ), 
+    fill = "grey70"
+  ) +
+  geom_line() +
+  facet_wrap(
+    ~ building, 
+    scales = 'free_y', 
+    ncol = 2
+  ) +
+  theme_bw()
+```
+
+The optimal number of traps differs for each building.
+
+## Exercises
+
+1. How would we build a revenue for a new building?
+__Hint__: generating a new intercept and a new slope from the posterior
+predictive distribution
+
+2. Let’s say our utility function is revenue. If we wanted to maximize
+expected revenue, we can take expectations at each station count for 
+each building, and choose the trap numbers that maximizes expected
+revenue. This will be called a maximum revenue strategy. How can we
+generate the distribution of portfolio revenue (i.e. the sum of revenue
+across all the buildings) under the maximum revenue strategy from the
+draws of _rev_pred_ we already have?
+

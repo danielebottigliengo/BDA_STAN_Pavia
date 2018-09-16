@@ -1,5 +1,5 @@
-// Hierarchical NB model with varying intercepts and slopes and
-// month effect
+// Predictions using hierarchical NB model with varying intercepts
+// and slopes and month effect
 
 functions {
   /*
@@ -25,16 +25,30 @@ data {
   vector[N] log_sq_foot;
 
   // building-level data
-  int<lower = 1> K;
-  int<lower = 1> J;
-  int<lower = 1, upper = J> building_idx[N];
-  matrix[J,K] building_data;
+  int<lower = 1> K;     // number of building-level predictors
+  int<lower = 1> J;     // number of buildings
+  int<lower = 1, upper = J> building_idx[N]; // building id
+  matrix[J, K] building_data; // building-level matrix
 
   // month info
   int<lower = 1> M;
   int<lower = 1, upper = M> mo_idx[N];
+
+  // To use in the generated quantities block
+  int<lower = 1> M_forward;
+  vector[J] log_sq_foot_pred;
+
+  // Number of traps used to predict number of complaints
+  int N_hypo_traps;
+  int hypo_traps[N_hypo_traps];
+
+  // Lost revenue for one complaint
+  real lost_rev;
+
 }
+
 parameters {
+
   real<lower = 0> inv_phi;   // inverse of phi
 
   // Varying intercept for the buildings
@@ -110,42 +124,53 @@ model {
             normal_lpdf(mo_raw | 0, 1) +
             normal_lpdf(sigma_mo | 0, 1);
 
-  // Alternative formulation
-  // inv_phi ~ normal(0, 1);
-  //
-  // kappa_raw ~ normal(0,1) ;
-  // sigma_kappa ~ normal(0, 1);
-  // beta ~ normal(-0.25, 1);
-  // gamma ~ normal(0, 1);
-  //
-  // mu_raw ~ normal(0,1) ;
-  // sigma_mu ~ normal(0, 1);
-  // alpha ~ normal(log(4), 1);
-  // zeta ~ normal(0, 1);
-  //
-  // rho_raw ~ beta(10, 5);
-  // mo_raw ~ normal(0, 1);
-  // sigma_mo ~ normal(0, 1);
-  //
-  // complaints ~ neg_binomial_2_log(mu[building_idx] +
-  //                                kappa[building_idx] .* traps +
-  //                                mo[mo_idx] +
-  //                                log_sq_foot,
-  //                                phi);
-
 }
+
 generated quantities {
 
-  int y_rep[N];
+  /*  we'll predict number of complaints and revenue lost for each
+  building at each hypothetical number of traps for M_forward months in
+  the future*/
 
-  for (n in 1:N) {
-    real eta_n =
-      mu[building_idx[n]] +
-      kappa[building_idx[n]] * traps[n] +
-      mo[mo_idx[n]] +
-      log_sq_foot[n];
+  int y_pred[J, N_hypo_traps];
+  matrix[J, N_hypo_traps] rev_pred;
 
-    y_rep[n] = neg_binomial_2_log_safe_rng(eta_n, phi);
+  for (j in 1:J) {  // loop over buildings
+
+    for (i in 1:N_hypo_traps) {  // loop over hypothetical traps
+
+      int y_pred_by_month[M_forward]; // monthly predictions
+      vector[M_forward] mo_forward;   // number of month forward
+
+      // first future month depends on last observed month
+      mo_forward[1] = normal_rng(rho * mo[M], sigma_mo);
+
+      for (m in 2:M_forward) {
+
+        mo_forward[m] = normal_rng(rho * mo_forward[m-1], sigma_mo);
+
+      }
+
+      for (m in 1:M_forward) {
+        real eta = mu[j] +
+                   kappa[j] * hypo_traps[i] +
+                   mo_forward[m] +
+                   log_sq_foot_pred[j];
+
+        y_pred_by_month[m] = neg_binomial_2_log_safe_rng(eta, phi);
+
+      }
+
+      // Sum the number of complaints by month for each number of
+      // traps in each building
+      y_pred[j, i] = sum(y_pred_by_month);
+
+      /* We  were were told every 10 complaints has additional
+      exterminator cost of $100, so $10 lose per complaint.*/
+      rev_pred[j,i] = y_pred[j,i] * (-lost_rev);
+    }
   }
 }
+
+
 

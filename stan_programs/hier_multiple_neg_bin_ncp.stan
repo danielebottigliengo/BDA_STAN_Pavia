@@ -32,7 +32,7 @@ parameters {
   real<lower = 0> inv_phi;  // inverse overdispersion's parameter
   real beta;                // coefficient on traps
   real alpha;               // intercept on the building
-  vector[J] mu_star;        // parameter of the varying intercept
+  vector[J] mu_raw;         // auxiliary parameter
   real<lower = 0> sigma_mu; // sd of the varying intercept
   vector[K] zeta;           // vector of coefficient of building vars
 }
@@ -41,8 +41,9 @@ transformed parameters {
 
   // get the original phi
   real phi = inv(inv_phi);
+
   // get the original parameter of the varying intercept
-  vector[J] mu = alpha + building_data * zeta + sigma_mu * mu_star;
+  vector[J] mu = alpha + building_data * zeta + sigma_mu * mu_raw;
 }
 
 model {
@@ -72,7 +73,7 @@ model {
   // sigma_mu ~ normal(0, 1);
 
   target += normal_lpdf(zeta | 0, 1) +
-            normal_lpdf(mu_star| 0, 1) +
+            normal_lpdf(mu_raw| 0, 1) +
             normal_lpdf(sigma_mu | 0, 1);
 }
 
