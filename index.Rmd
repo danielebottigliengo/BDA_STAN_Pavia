@@ -33,7 +33,11 @@ library(rstan)                                     # R interface to Stan
 options(mc.cores = parallel::detectCores() - 1)
 # To avoid recompilation of unchanged Stan programs
 rstan_options(auto_write = TRUE)
+# Package for Bayesian inference visualization
 library(bayesplot)
+# Package for model comparison
+library(loo)
+
 
 # Package(s) for data management 
 library(tidyverse)            # Imports the principal tidyverse packages
