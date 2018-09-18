@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html >
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>An Introduction to Bayesian Data Analysis with Stan</title>
+  <meta name="description" content="Notes and exercises from the course on Bayesian Data Analysis with Stan taken during the 1st International Summer School at the Department of Brain and Behavioral Sciences Medical Statistics and Genomic Unit, University of Pavia, Italy.">
+  <meta name="generator" content="bookdown 0.7 and GitBook 2.6.7">
+
+  <meta property="og:title" content="An Introduction to Bayesian Data Analysis with Stan" />
+  <meta property="og:type" content="book" />
+  
+  
+  <meta property="og:description" content="Notes and exercises from the course on Bayesian Data Analysis with Stan taken during the 1st International Summer School at the Department of Brain and Behavioral Sciences Medical Statistics and Genomic Unit, University of Pavia, Italy." />
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="An Introduction to Bayesian Data Analysis with Stan" />
+  
+  <meta name="twitter:description" content="Notes and exercises from the course on Bayesian Data Analysis with Stan taken during the 1st International Summer School at the Department of Brain and Behavioral Sciences Medical Statistics and Genomic Unit, University of Pavia, Italy." />
+  
+
+<meta name="author" content="Daniele Bottigliengo">
+
+
+<meta name="date" content="2018-09-17">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  
+  
+<link rel="prev" href="day4.html">
+<link rel="next" href="references.html">
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">Bayesian Data Analysis with Stan</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Information on the course</a><ul>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#settings"><i class="fa fa-check"></i>Settings</a></li>
+</ul></li>
+<li class="chapter" data-level="1" data-path="day1.html"><a href="day1.html"><i class="fa fa-check"></i><b>1</b> Foundations of Bayesian inference in theory and practice and Stan software</a><ul>
+<li class="chapter" data-level="1.1" data-path="day1.html"><a href="day1.html#what-is-stan"><i class="fa fa-check"></i><b>1.1</b> What is Stan?</a></li>
+<li class="chapter" data-level="1.2" data-path="day1.html"><a href="day1.html#bayesian-workflow"><i class="fa fa-check"></i><b>1.2</b> Bayesian workflow</a></li>
+<li class="chapter" data-level="1.3" data-path="day1.html"><a href="day1.html#world-concentration-ofo-pm2.5-case-study"><i class="fa fa-check"></i><b>1.3</b> World concentration ofo PM2.5: case study</a><ul>
+<li class="chapter" data-level="1.3.1" data-path="day1.html"><a href="day1.html#exploratory-data-analysis-building-a-network-of-model"><i class="fa fa-check"></i><b>1.3.1</b> Exploratory Data Analysis: building a network of model</a></li>
+<li class="chapter" data-level="1.3.2" data-path="day1.html"><a href="day1.html#prior-predictive-checks-fake-data-can-be-as-valuable-as-real-data"><i class="fa fa-check"></i><b>1.3.2</b> Prior Predictive Checks: fake data can be as valuable as real data</a></li>
+</ul></li>
+<li class="chapter" data-level="1.4" data-path="day1.html"><a href="day1.html#pest-control-of-roaches-in-apartment-buildings-a-case-study"><i class="fa fa-check"></i><b>1.4</b> Pest control of roaches in apartment buildings: a case study</a><ul>
+<li class="chapter" data-level="1.4.1" data-path="day1.html"><a href="day1.html#the-goal"><i class="fa fa-check"></i><b>1.4.1</b> The goal</a></li>
+<li class="chapter" data-level="1.4.2" data-path="day1.html"><a href="day1.html#exploratory-data-analysis"><i class="fa fa-check"></i><b>1.4.2</b> Exploratory data analysis</a></li>
+<li class="chapter" data-level="1.4.3" data-path="day1.html"><a href="day1.html#the-model"><i class="fa fa-check"></i><b>1.4.3</b> The model</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="day2.html"><a href="day2.html"><i class="fa fa-check"></i><b>2</b> Bayesian applied regression models</a><ul>
+<li class="chapter" data-level="2.1" data-path="day2.html"><a href="day2.html#posterior-predictive-checks"><i class="fa fa-check"></i><b>2.1</b> Posterior predictive checks</a><ul>
+<li class="chapter" data-level="2.1.1" data-path="day2.html"><a href="day2.html#negative-binomial-model"><i class="fa fa-check"></i><b>2.1.1</b> Negative Binomial model</a></li>
+</ul></li>
+<li class="chapter" data-level="2.2" data-path="day2.html"><a href="day2.html#mcmc-algorithms"><i class="fa fa-check"></i><b>2.2</b> MCMC algorithms</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="day3.html"><a href="day3.html"><i class="fa fa-check"></i><b>3</b> Hierarchical/Multilevel modeling (part 1)</a><ul>
+<li class="chapter" data-level="3.1" data-path="day3.html"><a href="day3.html#pest-control-example-negative-binomial-model"><i class="fa fa-check"></i><b>3.1</b> Pest control example: negative-binomial model</a></li>
+<li class="chapter" data-level="3.2" data-path="day3.html"><a href="day3.html#pest-control-example-hierarchical-model-varying-intercept"><i class="fa fa-check"></i><b>3.2</b> Pest control example: hierarchical model (varying intercept)</a><ul>
+<li class="chapter" data-level="3.2.1" data-path="day3.html"><a href="day3.html#preparing-hierarchical-data-for-stan-program"><i class="fa fa-check"></i><b>3.2.1</b> Preparing hierarchical data for Stan program</a></li>
+<li class="chapter" data-level="3.2.2" data-path="day3.html"><a href="day3.html#centered-parametrization"><i class="fa fa-check"></i><b>3.2.2</b> Centered parametrization</a></li>
+<li class="chapter" data-level="3.2.3" data-path="day3.html"><a href="day3.html#non-centered-parametrization"><i class="fa fa-check"></i><b>3.2.3</b> Non-centered parametrization</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="day4.html"><a href="day4.html"><i class="fa fa-check"></i><b>4</b> Hierarchical/Multilevel modeling (part 2)</a><ul>
+<li class="chapter" data-level="4.1" data-path="day4.html"><a href="day4.html#varying-intercept-and-varying-slopes"><i class="fa fa-check"></i><b>4.1</b> Varying intercept and varying slopes</a></li>
+<li class="chapter" data-level="4.2" data-path="day4.html"><a href="day4.html#time-varying-effects-and-structured-priors"><i class="fa fa-check"></i><b>4.2</b> Time varying effects and structured priors</a></li>
+<li class="chapter" data-level="4.3" data-path="day4.html"><a href="day4.html#use-the-model"><i class="fa fa-check"></i><b>4.3</b> Use the model</a></li>
+<li class="chapter" data-level="4.4" data-path="day4.html"><a href="day4.html#exercises"><i class="fa fa-check"></i><b>4.4</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="day5.html"><a href="day5.html"><i class="fa fa-check"></i><b>5</b> Model comparison</a></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">An Introduction to Bayesian Data Analysis with Stan</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="day5" class="section level1">
+<h1><span class="header-section-number">Day 5</span> Model comparison</h1>
+<p>How can we compare more fitted model to choose which model to use to support the decision making process?</p>
+<p>We want to assess how the models predict outcome values with new values. The most common approach involves training a model on a set of data (training set) and validating the model on other set of data (validation set) on which we evaluate the predictive performance.</p>
+<p>In most situations we want to decide which model to use before collecting new data that can be used for model validation. In such situations, we can make some assumptions on the performance of the models if we would collect new data. We can make some assumptions on predictive density, which measures how surprisingly the data are compare with our model. Basically, when we have a new data point, the model tells us how the new value is reasonable given model assumptions. If we have new data, we can evaluate the average reasonability of the data given our model.</p>
+<p>We can get some measure performance even if we don’t have a new data. We can define a measure of predictive accuracy for the <span class="math inline">\(n\)</span> observed data, which we will call Expected Log Pointwise Predictive Density (ELPD):</p>
+<p><span class="math display">\[
+\sum_{i = 1}^{n} \int p_{t} \left( \tilde{y_{i}} \right) p \left( \tilde{y_{i}} \vert y_{i} \right) d \tilde{y_{i}}
+\]</span></p>
+<p>where <span class="math inline">\(p_{t} \left( \tilde{y_{i}} \right)\)</span> is the distribution of the true data generating process and <span class="math inline">\(p \left( \tilde{y_{i}} | y_{i} \right)\)</span> is the log predictive density. Obviously, <span class="math inline">\(p_{t} \left( \tilde{y_{i}} \right)\)</span> is unknown, so we need to approximate it using WAIC or cross-validation.</p>
+<p>On the observed data, we can compute the Log Pointwise Predictive Density (LPD) as follows:</p>
+<p><span class="math display">\[
+\sum_{i = 1}^{n} \log p \left( y_{i} \vert y \right) = \\
+\sum_{i = 1}^{n} \log \int p \left( y_{i} \vert \theta \right) p \left( \theta \vert y \right) d \theta
+\]</span> In practice, the LPD can be computed by evaluating the its expectation over the posterior draws of <span class="math inline">\(\theta\)</span>. Denoting with <span class="math inline">\(S\)</span> the samples drawn from the posterior:</p>
+<p><span class="math display">\[
+\widehat{LPD} = \sum_{i = 1}^{n} \log \left( \frac{1}{S} \sum_{s = 1}^{S} p \left( y_{i} \vert \theta_{s}  \right)\right)
+\]</span></p>
+<p>Of course, the LPD on the observed data will overconfident, because it is computed on the same set of observations used to train the model.</p>
+<p>The face the issue of overconfidence with prediction on the training set, we can use the Leave-One-Out Cross-Validation (LOO-CV). Basically it consists of training the model on all the observed data but one. The left observation is used as validation set. The operation is repeated for all the data points and then the individual log posterior density is summed across the observations. The Bayesian LOO-CV can be formalized as follows:</p>
+<p><span class="math display">\[
+ELPD_{loo} = \sum_{i = 1}^{n} \log p \left( y_{i} \vert y_{i - 1} \right)
+\]</span></p>
+<p>where</p>
+<p><span class="math display">\[
+p \left( y_{i} \vert y_{i - 1} \right) = \int p \left( y_{i} \vert \theta \right) p \left( \theta \vert y_{i - 1} \right)
+\]</span></p>
+<p>We can compare the difference of ELPD between two models on the data points to check how the models measure the plausibility of each data points and how the models predict the data points (maybe a model is able to better predict some data points than the other).</p>
+<p>The problem is that if the model is slow or if we have a lot of data points, fitting <span class="math inline">\(n\)</span> models is not feasible. How can we compute LOO-CV without fitting <span class="math inline">\(n\)</span> models?</p>
+<p>We can approximate LOO-CV performance as follows:</p>
+<ul>
+<li><p>fit the model once and then use Pareto Smoothed Importance Sampling (PSIS-LOO)</p></li>
+<li><p>A weight is associated to each observation and it measures the importance of the observation in the computation of the posterior of the parameters of the model. A Pareto distribution is then fitted to the distribution of weights.</p></li>
+<li><p>The largest weights with order statistics with Pareto distribution are replaced.</p></li>
+<li><p>We assume that the posterior is not highly sensitive to leaving out a single data point.</p></li>
+<li><p>How would we know if such an assumption holds? Maybe there are some observations which are relevant for the model.</p></li>
+<li><p>Based on the estimate of the shape parameter (<span class="math inline">\(k\)</span>) of Pareto distribution we can know if such assumption holds.</p></li>
+<li><p>For larger values of <span class="math inline">\(k\)</span> the <strong>loo</strong> package gives some warnings, telling us that some observations are very important for the model and the posterior may be sensitive if leaving out those observations.</p></li>
+<li><p>If warnings are thrown out by the package, it means that PSIS is not reliable in such situation.</p></li>
+<li><p>For the problematic observations we can compute the LPD exactly by fitting the model to all the other data and evaluate the elpd on the particular observations.</p></li>
+</ul>
+<p>Models are then compared by looking at their ELPD. The one with higher value is the one that should be preferred in terms of predictive performance. For further details on the use of LOO-CV we remind the reader to the study of Vehtari et al. (2017) .</p>
+<p>We will show how perform Bayesian model comparison using <strong>loo</strong> R package. The demonstration will be implemented on some fake data in we will use a logistic regression to model the prediction of an hypothetical event.</p>
+<p>First we define the parameters of the data generating process.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Consider a model with 2 continuous variables, one binary variable</span>
+<span class="co"># and interaction between the binary and one of the two continuous </span>
+<span class="co"># variables</span>
+
+<span class="co"># Number of observations</span>
+n &lt;-<span class="st"> </span>5000L
+
+<span class="co"># Number of coefficients</span>
+k &lt;-<span class="st"> </span>5L
+
+<span class="co"># Define the vector of parameters</span>
+beta_vector &lt;-<span class="st"> </span><span class="kw">c</span>(
+  <span class="op">-</span><span class="kw">log</span>(<span class="fl">2.5</span>),        <span class="co"># intercept</span>
+  <span class="kw">log</span>(<span class="fl">0.8</span>),         <span class="co"># x1 (cont)</span>
+  <span class="kw">log</span>(<span class="fl">1.1</span>),         <span class="co"># x2 (cont)</span>
+  <span class="kw">log</span>(<span class="fl">2.2</span>),         <span class="co"># x3 (binary)</span>
+  <span class="kw">log</span>(<span class="fl">1.5</span>)          <span class="co"># x1*x3</span>
+)
+
+<span class="co"># Alternative code to generate data with R</span>
+<span class="co"># # Generate matrix of covariates</span>
+<span class="co"># des_mat &lt;- data_frame(</span>
+<span class="co">#   x1 = rnorm(n = n, mean = 0, sd = 1),</span>
+<span class="co">#   x2 = rnorm(n = n, mean = 0, sd = 1),</span>
+<span class="co">#   x3 = rbinom(n = n, size = 1, prob = 0.4)</span>
+<span class="co"># ) %&gt;%</span>
+<span class="co">#   model.matrix(</span>
+<span class="co">#     ~ x1 + x2 + x3 + x1:x3,</span>
+<span class="co">#     data = .</span>
+<span class="co">#   )</span>
+<span class="co"># </span>
+<span class="co"># # Linear predictor</span>
+<span class="co"># eta &lt;- des_mat %*% beta_vector</span>
+<span class="co"># </span>
+<span class="co"># # Transform on probability scale</span>
+<span class="co"># prob &lt;- 1/(1 + exp(-eta))</span>
+<span class="co"># </span>
+<span class="co"># # Get the outcome variable</span>
+<span class="co"># y &lt;- rbinom(n = n, size = 1, prob = prob)</span>
+<span class="co"># </span>
+<span class="co"># # Get the proportion of events</span>
+<span class="co"># table(y)</span></code></pre></div>
+<p>Here’s the Stan program to generate fake data from the prior predictive distribution.</p>
+<pre><code>// Logistic regression Data Generating Process
+
+data{
+
+  int&lt;lower = 1&gt; N;                     // number of observations
+  int&lt;lower = 1&gt; K;                     // number of coefficients
+  vector[K] beta; // coefficients
+
+}
+
+parameters{
+
+}
+
+model {
+
+}
+
+generated quantities {
+
+  // Declare simulated variables
+  vector[N] x1;
+  vector[N] x2;
+  int&lt;lower = 0, upper = 1&gt; x3[N];
+  int&lt;lower = 0, upper = 1&gt; y[N];
+
+  // Generate parameters value from the prior predictive distribution
+  // (try a t_student)
+  real alpha = student_t_rng(7, beta[1], 0.1);
+  real beta_x1 = student_t_rng(7, beta[2], 0.1);
+  real beta_x2 = student_t_rng(7, beta[3], 0.1);
+  real beta_x3 = student_t_rng(7, beta[4], 0.1);
+  real beta_x1_x3 = student_t_rng(7, beta[5], 0.1);
+
+  // Declare linear predictor
+  real eta;
+
+  // Generate simulated values of the outcome
+  for (n in 1:N) {
+
+    // Generate covariates
+    x1[n] = normal_rng(0, 1);
+    x2[n] = normal_rng(0, 1);
+    x3[n] = bernoulli_rng(0.4);
+
+    // Linear predictor
+    eta = alpha +
+          beta_x1 * x1[n] +
+          beta_x2 * x2[n] +
+          beta_x3 * x3[n] +
+          beta_x1_x3 * x1[n] * x3[n];
+
+    y[n] = bernoulli_logit_rng(eta);
+
+  }
+
+}
+</code></pre>
+<p>Now let’s compile the model and sample from the prior.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># List of data to pass to Stan</span>
+fake_list &lt;-<span class="st"> </span><span class="kw">list</span>(
+  <span class="dt">N =</span> n,
+  <span class="dt">K =</span> k,
+  <span class="dt">beta =</span> beta_vector
+)
+
+<span class="co"># Compile the data generating process model</span>
+logit_dgp_comp &lt;-<span class="st"> </span><span class="kw">stan_model</span>(
+  <span class="dt">file =</span> <span class="st">&quot;stan_programs/loo_logit_dgp.stan&quot;</span>
+)
+
+<span class="co"># Sample to get fake data</span>
+samps_logit_dgp &lt;-<span class="st"> </span><span class="kw">sampling</span>(
+  <span class="dt">object =</span> logit_dgp_comp,
+  <span class="dt">data =</span> fake_list,
+  <span class="dt">chains =</span> 1L,
+  <span class="dt">cores =</span> 1L,
+  <span class="dt">iter =</span> 1L,
+  <span class="dt">algorithm =</span> <span class="st">&quot;Fixed_param&quot;</span>,
+  <span class="dt">seed =</span> mcmc_seed
+)</code></pre></div>
+<pre><code>#&gt; 
+#&gt; SAMPLING FOR MODEL &#39;loo_logit_dgp&#39; NOW (CHAIN 1).
+#&gt; Iteration: 1 / 1 [100%]  (Sampling)
+#&gt; 
+#&gt;  Elapsed Time: 0 seconds (Warm-up)
+#&gt;                0 seconds (Sampling)
+#&gt;                0 seconds (Total)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Get fake data</span>
+fake_data &lt;-<span class="st"> </span>rstan<span class="op">::</span><span class="kw">extract</span>(samps_logit_dgp)
+
+<span class="co"># Store fake data into a list</span>
+fake_data_list &lt;-<span class="st"> </span><span class="kw">list</span>(
+  <span class="dt">N =</span> n,
+  <span class="dt">K =</span> k,
+  <span class="dt">beta =</span> beta_vector,
+  <span class="dt">x1 =</span> fake_data<span class="op">$</span>x1[<span class="dv">1</span>, ],
+  <span class="dt">x2 =</span> fake_data<span class="op">$</span>x2[<span class="dv">1</span>, ],
+  <span class="dt">x3 =</span> fake_data<span class="op">$</span>x3[<span class="dv">1</span>, ],
+  <span class="dt">y =</span> fake_data<span class="op">$</span>y[<span class="dv">1</span>, ]
+)</code></pre></div>
+<p>We now fit the full model to check if we can recover the parameter values of the data generating process. The Stan program of the full model is as follows:</p>
+<pre><code>// Logistic regression full model
+
+data{
+
+  int&lt;lower = 1&gt; N;                    // number of observations
+  int&lt;lower =1&gt; K;                     // number of coefficients
+  vector[K] beta;                      // vector of coefficients
+  vector[N] x1;                        // continuous predictor
+  vector[N] x2;                        // continuous predictor
+  vector&lt;lower = 0, upper = 1&gt;[N] x3;  // binary predictor
+  int&lt;lower = 0, upper = 1&gt; y[N];      // outcome
+
+}
+
+parameters {
+
+  real alpha;
+  real beta_x1;
+  real beta_x2;
+  real beta_x3;
+  real beta_x1_x3;
+
+}
+
+model {
+
+  // Linear predictor
+  vector[N] eta;
+
+  // Prios
+  target += student_t_lpdf(alpha | 7, beta[1], 1) +
+            student_t_lpdf(beta_x1 | 7, beta[2], 1) +
+            student_t_lpdf(beta_x2 | 7, beta[3], 1) +
+            student_t_lpdf(beta_x3 | 7, beta[4], 1) +
+            student_t_lpdf(beta_x1_x3 | 7, beta[5], 1);
+
+  // Linear predictor
+  eta = alpha +
+        beta_x1 * x1 +
+        beta_x2 * x2 +
+        beta_x3 * x3 +
+        beta_x1_x3 * x1 .* x3;
+
+  // Likelihood
+  target += bernoulli_logit_lpmf(y | eta);
+
+}
+
+generated quantities{
+
+  vector[N] y_rep;       // replicated data
+  vector[N] log_lik;     // pointwise log likelihood for LOO-CV
+
+  for(n in 1:N) {
+
+    real eta_rep = alpha +
+                   beta_x1 * x1[n] +
+                   beta_x2 * x2[n] +
+                   beta_x3 * x3[n] +
+                   beta_x1_x3 * x1[n] * x3[n];
+
+    y_rep[n] = bernoulli_logit_rng(eta_rep);
+
+    log_lik[n] = bernoulli_logit_lpmf(y[n] | eta_rep);
+
+  }
+
+
+}
+</code></pre>
+<p>In the generated quantities we store the <em>log lik</em> vector. It contains the log predictive pointwise density of the observed data, which we will use later to compute the ELPD using the LOO-CV.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Compile the full model</span>
+full_logit_comp &lt;-<span class="st"> </span><span class="kw">stan_model</span>(
+  <span class="dt">file =</span> <span class="st">&quot;stan_programs/loo_logit_full_model.stan&quot;</span>
+)
+
+<span class="co"># Sample from the posterior</span>
+fitted_full_logit &lt;-<span class="st"> </span><span class="kw">sampling</span>(
+  <span class="dt">object =</span> full_logit_comp,
+  <span class="dt">data =</span> fake_data_list,
+  <span class="dt">warmup =</span> 1000L,
+  <span class="dt">iter =</span> 2000L,
+  <span class="dt">chains =</span> 4L,
+  <span class="dt">seed =</span> mcmc_seed
+)
+
+<span class="co"># Get the posterior of the parameters</span>
+post_alpha_betas &lt;-<span class="st"> </span><span class="kw">as.matrix</span>(
+  fitted_full_logit,
+  <span class="dt">pars =</span> <span class="kw">c</span>(
+    <span class="st">&quot;alpha&quot;</span>, 
+    <span class="st">&quot;beta_x1&quot;</span>, 
+    <span class="st">&quot;beta_x2&quot;</span>,
+    <span class="st">&quot;beta_x3&quot;</span>,
+    <span class="st">&quot;beta_x1_x3&quot;</span>
+  )
+)
+
+<span class="co"># Get the parameter values of the data generating process</span>
+true_alpha_beta &lt;-<span class="st"> </span><span class="kw">c</span>(
+  fake_data<span class="op">$</span>alpha,
+  fake_data<span class="op">$</span>beta_x1,
+  fake_data<span class="op">$</span>beta_x2,
+  fake_data<span class="op">$</span>beta_x3,
+  fake_data<span class="op">$</span>beta_x1_x3
+)
+
+<span class="co"># Plot the true values</span>
+<span class="kw">mcmc_recover_hist</span>(
+  <span class="dt">x =</span> post_alpha_betas,
+  <span class="dt">true =</span> true_alpha_beta
+)</code></pre></div>
+<p><img src="BDA_STAN_Pavia_files/figure-html/unnamed-chunk-67-1.png" width="672" /></p>
+<p>The model seems to be able to recover the parameters of the data generating process.</p>
+<p>We will compare 3 models:</p>
+<ul>
+<li>A model with only continuous variables</li>
+<li>A model with continuous variables and the binary variable</li>
+<li>The full model</li>
+</ul>
+<p>We will compile the first two models and we will sample from their posteriors. The full model has been already compiled and we have already sampled from its posterior.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Compiles the models</span>
+logit_1_comp &lt;-<span class="st"> </span><span class="kw">stan_model</span>(
+  <span class="dt">file =</span> <span class="st">&quot;stan_programs/loo_logit_model_1.stan&quot;</span>
+)
+
+logit_2_comp &lt;-<span class="st"> </span><span class="kw">stan_model</span>(
+  <span class="dt">file =</span> <span class="st">&quot;stan_programs/loo_logit_model_2.stan&quot;</span>
+)
+
+<span class="co"># Sample from their posteriors</span>
+fitted_logit_<span class="dv">1</span> &lt;-<span class="st"> </span><span class="kw">sampling</span>(
+  <span class="dt">object =</span> logit_1_comp,
+  <span class="dt">data =</span> fake_data_list,
+  <span class="dt">warmup =</span> 1000L,
+  <span class="dt">iter =</span> 2000L,
+  <span class="dt">chains =</span> 4L,
+  <span class="dt">seed =</span> mcmc_seed
+)
+
+fitted_logit_<span class="dv">2</span> &lt;-<span class="st"> </span><span class="kw">sampling</span>(
+  <span class="dt">object =</span> logit_2_comp,
+  <span class="dt">data =</span> fake_data_list,
+  <span class="dt">warmup =</span> 1000L,
+  <span class="dt">iter =</span> 2000L,
+  <span class="dt">chains =</span> 4L,
+  <span class="dt">seed =</span> mcmc_seed
+)</code></pre></div>
+<p>We can now extract the LPD for each model and compute ELPD with LOO-CV with PSIS.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Extract lpd of each model</span>
+log_lik_<span class="dv">1</span> &lt;-<span class="st"> </span><span class="kw">extract_log_lik</span>(
+  <span class="dt">stanfit =</span> fitted_logit_<span class="dv">1</span>,
+  <span class="dt">merge_chains =</span> <span class="ot">FALSE</span>
+)
+
+r_eff_<span class="dv">1</span> &lt;-<span class="st"> </span><span class="kw">relative_eff</span>(<span class="kw">exp</span>(log_lik_<span class="dv">1</span>))
+
+log_lik_<span class="dv">2</span> &lt;-<span class="st"> </span><span class="kw">extract_log_lik</span>(
+  <span class="dt">stanfit =</span> fitted_logit_<span class="dv">2</span>,
+  <span class="dt">merge_chains =</span> <span class="ot">FALSE</span>
+)
+
+r_eff_<span class="dv">2</span> &lt;-<span class="st"> </span><span class="kw">relative_eff</span>(<span class="kw">exp</span>(log_lik_<span class="dv">2</span>))
+
+log_lik_full &lt;-<span class="st"> </span><span class="kw">extract_log_lik</span>(
+  <span class="dt">stanfit =</span> fitted_full_logit,
+  <span class="dt">merge_chains =</span> <span class="ot">FALSE</span>
+)
+
+r_eff_full &lt;-<span class="st"> </span><span class="kw">relative_eff</span>(<span class="kw">exp</span>(log_lik_full))
+
+<span class="co"># Compute ELPD for each model with LOO-CV </span>
+loo_<span class="dv">1</span> &lt;-<span class="st"> </span><span class="kw">loo</span>(log_lik_<span class="dv">1</span>, <span class="dt">r_eff =</span> r_eff_<span class="dv">1</span>)
+loo_<span class="dv">2</span> &lt;-<span class="st"> </span><span class="kw">loo</span>(log_lik_<span class="dv">2</span>, <span class="dt">r_eff =</span> r_eff_<span class="dv">2</span>)
+loo_full &lt;-<span class="st"> </span><span class="kw">loo</span>(log_lik_full, <span class="dt">r_eff =</span> r_eff_full)</code></pre></div>
+<p>Now we compare the first two models.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Model 1 and 2</span>
+<span class="kw">compare</span>(loo_<span class="dv">1</span>, loo_<span class="dv">2</span>)</code></pre></div>
+<pre><code>#&gt; elpd_diff        se 
+#&gt;     155.7      17.5</code></pre>
+<p>As we expected, ELPD is higher in the second model, because we are modeling the outcome with one more predictor which we imposed to be a strong one. Let’s now compare the second and the full model.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">compare</span>(loo_<span class="dv">2</span>, loo_full)</code></pre></div>
+<pre><code>#&gt; elpd_diff        se 
+#&gt;      13.3       5.3</code></pre>
+<p>The full has higher ELPD because we included the interaction term.</p>
+
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="day4.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="references.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"google": false,
+"linkedin": false,
+"weibo": false,
+"instapper": false,
+"vk": false,
+"all": ["facebook", "google", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"download": null,
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "";
+    if (src === "" || src === "true") src = "https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:" && /^https?:/.test(src))
+      src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>

@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html >
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>An Introduction to Bayesian Data Analysis with Stan</title>
+  <meta name="description" content="Notes and exercises from the course on Bayesian Data Analysis with Stan taken during the 1st International Summer School at the Department of Brain and Behavioral Sciences Medical Statistics and Genomic Unit, University of Pavia, Italy.">
+  <meta name="generator" content="bookdown 0.7 and GitBook 2.6.7">
+
+  <meta property="og:title" content="An Introduction to Bayesian Data Analysis with Stan" />
+  <meta property="og:type" content="book" />
+  
+  
+  <meta property="og:description" content="Notes and exercises from the course on Bayesian Data Analysis with Stan taken during the 1st International Summer School at the Department of Brain and Behavioral Sciences Medical Statistics and Genomic Unit, University of Pavia, Italy." />
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="An Introduction to Bayesian Data Analysis with Stan" />
+  
+  <meta name="twitter:description" content="Notes and exercises from the course on Bayesian Data Analysis with Stan taken during the 1st International Summer School at the Department of Brain and Behavioral Sciences Medical Statistics and Genomic Unit, University of Pavia, Italy." />
+  
+
+<meta name="author" content="Daniele Bottigliengo">
+
+
+<meta name="date" content="2018-09-17">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  
+  
+<link rel="prev" href="index.html">
+<link rel="next" href="day2.html">
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">Bayesian Data Analysis with Stan</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Information on the course</a><ul>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#settings"><i class="fa fa-check"></i>Settings</a></li>
+</ul></li>
+<li class="chapter" data-level="1" data-path="day1.html"><a href="day1.html"><i class="fa fa-check"></i><b>1</b> Foundations of Bayesian inference in theory and practice and Stan software</a><ul>
+<li class="chapter" data-level="1.1" data-path="day1.html"><a href="day1.html#what-is-stan"><i class="fa fa-check"></i><b>1.1</b> What is Stan?</a></li>
+<li class="chapter" data-level="1.2" data-path="day1.html"><a href="day1.html#bayesian-workflow"><i class="fa fa-check"></i><b>1.2</b> Bayesian workflow</a></li>
+<li class="chapter" data-level="1.3" data-path="day1.html"><a href="day1.html#world-concentration-ofo-pm2.5-case-study"><i class="fa fa-check"></i><b>1.3</b> World concentration ofo PM2.5: case study</a><ul>
+<li class="chapter" data-level="1.3.1" data-path="day1.html"><a href="day1.html#exploratory-data-analysis-building-a-network-of-model"><i class="fa fa-check"></i><b>1.3.1</b> Exploratory Data Analysis: building a network of model</a></li>
+<li class="chapter" data-level="1.3.2" data-path="day1.html"><a href="day1.html#prior-predictive-checks-fake-data-can-be-as-valuable-as-real-data"><i class="fa fa-check"></i><b>1.3.2</b> Prior Predictive Checks: fake data can be as valuable as real data</a></li>
+</ul></li>
+<li class="chapter" data-level="1.4" data-path="day1.html"><a href="day1.html#pest-control-of-roaches-in-apartment-buildings-a-case-study"><i class="fa fa-check"></i><b>1.4</b> Pest control of roaches in apartment buildings: a case study</a><ul>
+<li class="chapter" data-level="1.4.1" data-path="day1.html"><a href="day1.html#the-goal"><i class="fa fa-check"></i><b>1.4.1</b> The goal</a></li>
+<li class="chapter" data-level="1.4.2" data-path="day1.html"><a href="day1.html#exploratory-data-analysis"><i class="fa fa-check"></i><b>1.4.2</b> Exploratory data analysis</a></li>
+<li class="chapter" data-level="1.4.3" data-path="day1.html"><a href="day1.html#the-model"><i class="fa fa-check"></i><b>1.4.3</b> The model</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="day2.html"><a href="day2.html"><i class="fa fa-check"></i><b>2</b> Bayesian applied regression models</a><ul>
+<li class="chapter" data-level="2.1" data-path="day2.html"><a href="day2.html#posterior-predictive-checks"><i class="fa fa-check"></i><b>2.1</b> Posterior predictive checks</a><ul>
+<li class="chapter" data-level="2.1.1" data-path="day2.html"><a href="day2.html#negative-binomial-model"><i class="fa fa-check"></i><b>2.1.1</b> Negative Binomial model</a></li>
+</ul></li>
+<li class="chapter" data-level="2.2" data-path="day2.html"><a href="day2.html#mcmc-algorithms"><i class="fa fa-check"></i><b>2.2</b> MCMC algorithms</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="day3.html"><a href="day3.html"><i class="fa fa-check"></i><b>3</b> Hierarchical/Multilevel modeling (part 1)</a><ul>
+<li class="chapter" data-level="3.1" data-path="day3.html"><a href="day3.html#pest-control-example-negative-binomial-model"><i class="fa fa-check"></i><b>3.1</b> Pest control example: negative-binomial model</a></li>
+<li class="chapter" data-level="3.2" data-path="day3.html"><a href="day3.html#pest-control-example-hierarchical-model-varying-intercept"><i class="fa fa-check"></i><b>3.2</b> Pest control example: hierarchical model (varying intercept)</a><ul>
+<li class="chapter" data-level="3.2.1" data-path="day3.html"><a href="day3.html#preparing-hierarchical-data-for-stan-program"><i class="fa fa-check"></i><b>3.2.1</b> Preparing hierarchical data for Stan program</a></li>
+<li class="chapter" data-level="3.2.2" data-path="day3.html"><a href="day3.html#centered-parametrization"><i class="fa fa-check"></i><b>3.2.2</b> Centered parametrization</a></li>
+<li class="chapter" data-level="3.2.3" data-path="day3.html"><a href="day3.html#non-centered-parametrization"><i class="fa fa-check"></i><b>3.2.3</b> Non-centered parametrization</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="day4.html"><a href="day4.html"><i class="fa fa-check"></i><b>4</b> Hierarchical/Multilevel modeling (part 2)</a><ul>
+<li class="chapter" data-level="4.1" data-path="day4.html"><a href="day4.html#varying-intercept-and-varying-slopes"><i class="fa fa-check"></i><b>4.1</b> Varying intercept and varying slopes</a></li>
+<li class="chapter" data-level="4.2" data-path="day4.html"><a href="day4.html#time-varying-effects-and-structured-priors"><i class="fa fa-check"></i><b>4.2</b> Time varying effects and structured priors</a></li>
+<li class="chapter" data-level="4.3" data-path="day4.html"><a href="day4.html#use-the-model"><i class="fa fa-check"></i><b>4.3</b> Use the model</a></li>
+<li class="chapter" data-level="4.4" data-path="day4.html"><a href="day4.html#exercises"><i class="fa fa-check"></i><b>4.4</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="day5.html"><a href="day5.html"><i class="fa fa-check"></i><b>5</b> Model comparison</a></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">An Introduction to Bayesian Data Analysis with Stan</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="day1" class="section level1">
+<h1><span class="header-section-number">Day 1</span> Foundations of Bayesian inference in theory and practice and Stan software</h1>
+<div id="what-is-stan" class="section level2">
+<h2><span class="header-section-number">1.1</span> What is Stan?</h2>
+<ul>
+<li><p>Open source probabilistic programming language</p></li>
+<li>How does Stan work?
+<ul>
+<li>declare data and the parameters of the model who you want to fit to the phenomenon under study</li>
+<li>define a posterior distribution for the parameters or a penalized likelihood</li>
+</ul></li>
+</ul>
+</div>
+<div id="bayesian-workflow" class="section level2">
+<h2><span class="header-section-number">1.2</span> Bayesian workflow</h2>
+<p>Bayesian data analysis workflow follows the following steps:</p>
+<ul>
+<li><p><em>Exploratory data analysis</em>: look at the data to understand the variation of the phenomenon and to think about what model should fit the data</p></li>
+<li><p><em>Prior predictive checking</em>: simulate fake data that look like real data drawing values of the parameters from the prior predictive distribution and fit the model to the fake data</p>
+<ul>
+<li>Check implications of the fitted model and how different prior distributions impact inference</li>
+<li>Understand the fitted model (if it makes sense in our particular domain)</li>
+</ul></li>
+<li><p><em>Fit the model to the data</em></p></li>
+<li><p><em>Diagnostics the algorithm</em>: check if the algorithm used to sample from the posterior distribution showed some pathological behaviours that affected the sampling and thus the final inference</p></li>
+<li><em>Posterior predictive checking</em>
+<ul>
+<li>Simulate from the fitted model outcome values and evaluate them with observed data. Does the model fit well the data?</li>
+</ul></li>
+<li><p><em>Compare different fitted models</em> to understand which model best represents your data (for example using cross-validation)</p></li>
+</ul>
+</div>
+<div id="world-concentration-ofo-pm2.5-case-study" class="section level2">
+<h2><span class="header-section-number">1.3</span> World concentration ofo PM2.5: case study</h2>
+<ul>
+<li><p><strong>Goal</strong>: estimate global PM2.5 concentration for different regions of the world</p></li>
+<li><p><strong>Problem</strong>: most of the data come from noisy satellite measurements (ground monitor provides sparse, heterogeneous coverage)</p></li>
+</ul>
+<div id="exploratory-data-analysis-building-a-network-of-model" class="section level3">
+<h3><span class="header-section-number">1.3.1</span> Exploratory Data Analysis: building a network of model</h3>
+<ul>
+<li>How to define regions where concentrations may vary?
+<ul>
+<li>WHO Regions</li>
+<li>Regions defined by clustering of the concentration levels</li>
+</ul></li>
+<li>It is possible to start visualizing and fiting different linear models for different regions identified by the clusters to understand how PM2.5 concentrations vary for different satellite measurements and if the variation is different across regions.
+<ul>
+<li>For some regions there’s a lot of variation and low number of measurements.</li>
+<li>Inference from the region with noisy data may be unreliable if the region is considered completely separated from the others.</li>
+<li><em>Partial Pooling</em>: bring information from different groups ( group with more information) to inform about the concentration of other regions (the ones with noisy data).</li>
+<li>Don’t treat the regions as completely different or as they are the same.</li>
+</ul></li>
+<li><p>Model 1: simple linear regression assuming all regions are equal</p>
+<ul>
+<li><p>Outcome: log(PM2.5)</p></li>
+<li><p>Covariate: satellite measurements (<em>sat</em>)</p></li>
+<li><p>Measurements: <span class="math inline">\(n = 1, ..., N\)</span></p></li>
+<li><p>Regions: <span class="math inline">\(j = 1, ..., J\)</span></p></li>
+</ul></li>
+</ul>
+<span class="math display">\[\begin{equation}
+
+\log \left( PM2.5 \right) \sim N \left( \alpha + \beta \log \left( sat_{nj} \right), \sigma \right)
+
+\end{equation}\]</span>
+<ul>
+<li>Model 2:</li>
+</ul>
+<span class="math display">\[\begin{equation}
+
+  \log \left( PM_{2.5, nj} \right) \sim N \left( \mu_{nj}, \sigma \right)
+  
+  \\
+  
+  \\
+  
+  \mu_{nj} = \alpha_{0} +  \alpha_{j} + \left( \beta_{0} + \beta_{j} \right)   \log \left( sat_{nj} \right)
+
+\end{equation}\]</span>
+<ul>
+<li>Priors on region-levels parameters:</li>
+</ul>
+<span class="math display">\[\begin{equation}
+
+  \alpha_{j} \sim N \left( 0, \tau_{\alpha} \right) \\
+  
+  \beta_{j} \sim N \left( 0, \tau_{\beta} \right)
+
+\end{equation}\]</span>
+<ul>
+<li>We impose probability distribution on the region-level paramters, to allow for different interecepts and slopes for different regions
+<ul>
+<li>We are evaluating the possibility that PM2.5. concentration varies, along with satellite measurements, differently from region to region.</li>
+<li>Priors are centered around 0 region’s intercepts vary around the constant intercept <span class="math inline">\(\alpha_{0}\)</span>.</li>
+</ul></li>
+</ul>
+</div>
+<div id="prior-predictive-checks-fake-data-can-be-as-valuable-as-real-data" class="section level3">
+<h3><span class="header-section-number">1.3.2</span> Prior Predictive Checks: fake data can be as valuable as real data</h3>
+<p>If it is harder to get intuition on the choice of the model, simulating fake data from the model can help to check which model gives the most plausible data distribution.</p>
+<ul>
+<li><p>Build a Bayesian model means defining a joint model for the data, expressed as y, and the unknowns (parameters and future data), expressed as <span class="math inline">\(\theta\)</span>.</p></li>
+<li><p>Given the priors belief and the data that we observed, we want to know the posterior distribution of parameters <span class="math inline">\(\theta\)</span> to make inference-</p></li>
+<li><p>In Bayesian statistics there is no distinction between a missing data and a parameter. The main distinction is between the observed, i.e. the data, and the unobserved, i.e. parameters or missing data, which is everything that is unknow.</p></li>
+<li><strong>Problems with vague priors !</strong>
+<ul>
+<li>The problem with the use of <em>improper</em> priors is that we don’t specify a joint model of the data and the parameters</li>
+<li>We don’t specify a data generating process</li>
+<li>We don’t regularize infereces</li>
+<li>We give to much probability to parameter values that are implausible (large values that approach infinty)</li>
+<li>Proper and vague priors are better, but still problematic</li>
+<li>Examples of traditional prior distributions:</li>
+</ul></li>
+</ul>
+<span class="math display">\[\begin{equation}
+
+\alpha_{0} \sim N \left( 0, 100 \right) \\
+\beta_{0} \sim N \left( 0, 100 \right) \\
+\tau_{\alpha} \sim InvGamma \left( 1, 100 \right) \\
+\tau_{\beta} \sim InvGamma \left( 1, 100 \right)
+
+\end{equation}\]</span>
+<ul>
+<li>How we build a generative model?
+<ul>
+<li>Simulate a value <span class="math inline">\(\theta^{*}\)</span> from the prior predictive distribution <span class="math inline">\(p \left( \theta \right)\)</span>.</li>
+<li>Plug the value into the model and simulate <span class="math inline">\(y^{*} \sim p \left( y \vert \theta \right)\)</span></li>
+</ul></li>
+<li><p>If data are simulated with these priors you get very unlikely values (physically impossible) <span class="math inline">\(\rightarrow\)</span> PM2.5 concentrations values that range between 200 and 800 on the log scale!</p></li>
+<li><p>Unless data are very informative, you get bad inference</p></li>
+<li><p>What are better priors for the problem at hand?</p></li>
+</ul>
+<span class="math display">\[\begin{equation}
+
+\alpha_{0} \sim N \left( 0, 1 \right) \\
+\beta_{0} \sim N \left( 1, 1 \right) \\
+\tau_{\alpha} \sim N^{+} \left( 0, 1 \right) \\
+\tau_{\beta} \sim N^{+} \left( 0, 1 \right)
+
+\end{equation}\]</span>
+<ul>
+<li><p>Simulated data cover a range of more plausible values given the problem at hand</p></li>
+<li><p><strong>Weakly Informative Prios</strong>: they work pretty well with sparse and noisy data</p></li>
+</ul>
+</div>
+</div>
+<div id="pest-control-of-roaches-in-apartment-buildings-a-case-study" class="section level2">
+<h2><span class="header-section-number">1.4</span> Pest control of roaches in apartment buildings: a case study</h2>
+<p>If you live in an apartment building there may a cost to deal with roaches infestation. Suppose you are a statistician hired by the company who owns sevaral apartment building in a city to answer to the following question: how much should we spend to balance the cost of the pest control and to balance the complaints of the people living in the apartments?</p>
+<div id="the-goal" class="section level3">
+<h3><span class="header-section-number">1.4.1</span> The goal</h3>
+<p>The decision problem can be formalized as follows:</p>
+<span class="math display">\[\begin{equation}
+
+\arg\max_{\textrm{traps} \in \mathbb{N}}
+\mathbb{E}_{\text{complaints}}[R(\textrm{complaints}(\textrm{traps})) -
+\textrm{TC}(\textrm{traps})]
+
+\end{equation}\]</span>
+<p>Basically the manager of the company wants to understand which is number of traps (<em>traps</em>) that maximizes the balance between lost revenue (<em>R</em>) generated by resident’s complaints total cost (<em>TC</em>) of maintaining the traps. Both complaints and total costs are function of the number of traps.</p>
+<p>From a Bayesian perspective, the problem can be thought at 2 stages: * Fitting a model to the data and draw values of the parameters from their posterior distributions. * Make decision based on the inference we draw using the posterior distribution of the parameter</p>
+<p>For every problem we face, we don’t need to be afraid to used complex models with lot of parameters. Complicated models that reflect our uncertainty in the problem at hand are needed to correctly support decision-making process .</p>
+<p>Let’s now load the data and look at the variables.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">pest_data &lt;-<span class="st"> </span><span class="kw">readRDS</span>(
+  here<span class="op">::</span><span class="kw">here</span>(
+    <span class="st">&quot;data/pest_data.RDS&quot;</span>
+  )
+)
+
+<span class="kw">str</span>(pest_data)</code></pre></div>
+<pre><code>#&gt; &#39;data.frame&#39;:    120 obs. of  14 variables:
+#&gt;  $ mus                 : num  0.369 0.359 0.282 0.129 0.452 ...
+#&gt;  $ building_id         : int  37 37 37 37 37 37 37 37 37 37 ...
+#&gt;  $ wk_ind              : int  1 2 3 4 5 6 7 8 9 10 ...
+#&gt;  $ date                : Date, format: &quot;2017-01-15&quot; &quot;2017-02-14&quot; ...
+#&gt;  $ traps               : num  8 8 9 10 11 11 10 10 9 9 ...
+#&gt;  $ floors              : num  8 8 8 8 8 8 8 8 8 8 ...
+#&gt;  $ sq_footage_p_floor  : num  5149 5149 5149 5149 5149 ...
+#&gt;  $ live_in_super       : num  0 0 0 0 0 0 0 0 0 0 ...
+#&gt;  $ monthly_average_rent: num  3847 3847 3847 3847 3847 ...
+#&gt;  $ average_tenant_age  : num  53.9 53.9 53.9 53.9 53.9 ...
+#&gt;  $ age_of_building     : num  47 47 47 47 47 47 47 47 47 47 ...
+#&gt;  $ total_sq_foot       : num  41192 41192 41192 41192 41192 ...
+#&gt;  $ month               : num  1 2 3 4 5 6 7 8 9 10 ...
+#&gt;  $ complaints          : num  1 3 0 1 0 0 4 3 2 2 ...</code></pre>
+</div>
+<div id="exploratory-data-analysis" class="section level3">
+<h3><span class="header-section-number">1.4.2</span> Exploratory data analysis</h3>
+<p>Let’s do some plots of the data as exploratory data analysis. Let’s look at the number of complaints and how they vary</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ggplot</span>(
+  <span class="dt">data =</span> pest_data,
+  <span class="dt">mapping =</span> <span class="kw">aes</span>(
+    <span class="dt">x =</span> complaints
+  )
+) <span class="op">+</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">geom_bar</span>() <span class="op">+</span>
+<span class="st">  </span><span class="kw">theme_bw</span>()</code></pre></div>
+<p><img src="BDA_STAN_Pavia_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p>Let’s plot the number of complaints for different buildings across the months during which traps were settled. Colors refer to apartment in different levels of the building.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ggplot</span>(
+  <span class="dt">data =</span> pest_data, 
+  <span class="kw">aes</span>(
+    <span class="dt">x =</span> date, 
+    <span class="dt">y =</span> complaints, 
+    <span class="dt">color =</span> live_in_super <span class="op">==</span><span class="st"> </span><span class="ot">TRUE</span>
+  )
+) <span class="op">+</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">geom_line</span>(
+    <span class="kw">aes</span>(<span class="dt">linetype =</span> <span class="st">&quot;Number of complaints&quot;</span>)
+  ) <span class="op">+</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">geom_point</span>(<span class="dt">color =</span> <span class="st">&quot;black&quot;</span>) <span class="op">+</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">geom_line</span>(
+    <span class="kw">aes</span>(
+      <span class="dt">y =</span> traps, 
+      <span class="dt">linetype =</span> <span class="st">&quot;Number of traps&quot;</span>
+    ), 
+    <span class="dt">color =</span> <span class="st">&quot;black&quot;</span>, 
+    <span class="dt">size =</span> <span class="fl">0.25</span>
+  ) <span class="op">+</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">facet_wrap</span>(
+    <span class="op">~</span>building_id, 
+     <span class="dt">scales =</span> <span class="st">&quot;free&quot;</span>, 
+     <span class="dt">ncol =</span> <span class="dv">2</span>, 
+     <span class="dt">labeller =</span> label_both
+  ) <span class="op">+</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">scale_x_date</span>(
+    <span class="dt">name =</span> <span class="st">&quot;Month&quot;</span>, 
+    <span class="dt">date_labels =</span> <span class="st">&quot;%b&quot;</span>
+  ) <span class="op">+</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">scale_y_continuous</span>(
+    <span class="dt">name =</span> <span class="st">&quot;&quot;</span>, 
+    <span class="dt">limits =</span> <span class="kw">range</span>(pest_data<span class="op">$</span>complaints)
+  ) <span class="op">+</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">scale_linetype_discrete</span>(<span class="dt">name =</span> <span class="st">&quot;&quot;</span>) <span class="op">+</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">scale_color_discrete</span>(<span class="dt">name =</span> <span class="st">&quot;Live-in super&quot;</span>) <span class="op">+</span>
+<span class="st">  </span><span class="kw">theme_bw</span>()</code></pre></div>
+<p><img src="BDA_STAN_Pavia_files/figure-html/data-plots-ts-1.png" width="576" /></p>
+<p>We can see that there’s lot of variation in the number of complaints both across bulding and level of the apartment in the building.</p>
+<p>How many zeros are present in the data?</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Number of zeros</span>
+<span class="kw">sum</span>(pest_data<span class="op">$</span>complaints <span class="op">==</span><span class="st"> </span><span class="ot">TRUE</span>)</code></pre></div>
+<pre><code>#&gt; [1] 22</code></pre>
+<p>What’s their percentage?</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Percentage of zeros</span>
+<span class="kw">sum</span>(pest_data<span class="op">$</span>complaints <span class="op">==</span><span class="st"> </span><span class="ot">TRUE</span>)<span class="op">/</span><span class="kw">nrow</span>(pest_data)</code></pre></div>
+<pre><code>#&gt; [1] 0.1833333</code></pre>
+</div>
+<div id="the-model" class="section level3">
+<h3><span class="header-section-number">1.4.3</span> The model</h3>
+<p>We will start with a simple model and then we will add structure to the model to get more realistic answers. We will further deal with the apartments as if they are not similar nor completely different. For now, we are going to model the number of complaints with a simple Poisson model using the number of traps as the only covariate. The model can be formalized as follows</p>
+<p><span class="math display">\[
+\begin{align*}
+\textrm{complaints}_{b,t} &amp; \sim \textrm{Poisson}(\lambda_{b,t}) \\
+\lambda_{b,t} &amp; = \exp{(\eta_{b,t})} \\
+\eta_{b,t} &amp;= \alpha + \beta \, \textrm{traps}_{b,t}
+\end{align*}
+\]</span></p>
+<p>Number of complaints are modeled as count data with Poisson regression, where <span class="math inline">\(b\)</span> is the number of apartment and <span class="math inline">\(t\)</span> is the month. As we mentioned above, we will start by assuming constant mean and variance across buildings, which is a very restrictive assumption.</p>
+<p>Let’s now fit the model. First we need to pass the data to the stan object as a list, declaring the number of observation, the vector of the outcome (number of complaints) and the vector (or also the matrix) of the covariate (number of traps):</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Data as list to pass to stan file</span>
+pest_data_list &lt;-<span class="st"> </span><span class="kw">list</span>(
+  <span class="dt">N =</span> <span class="kw">nrow</span>(pest_data),
+  <span class="dt">complaints =</span> pest_data[[<span class="st">&quot;complaints&quot;</span>]],
+  <span class="dt">n_traps =</span> pest_data[[<span class="st">&quot;traps&quot;</span>]]
+)</code></pre></div>
+<p>How is the Stan program that fit the model written? Stan programs are structured as “<em>blocks</em>”. In each block the user build a piece of the model that will be fitted to the data. The core blocks of a Stan program are the following:</p>
+<ul>
+<li><p><em>A data block</em>: the user specify the data that will be used to fit the model.</p></li>
+<li><p><em>A parameters block</em>: the user specify the parameters of the model that she wants to fit to the data.</p></li>
+<li><p><em>A model block</em>: the user specify the structure of the model in terms of priors distributions for the unobserved parameters and likelihood for the observed data.</p></li>
+<li><p><em>A generated quantities block</em>: the user specificy the quantities of interest that she wants to simulated given the posterior distribution of the model (predictive or future values, missing data, ecc.)</p></li>
+</ul>
+<p>Let’s start to write the Stan program of our model.</p>
+<pre><code>data {
+  int&lt;lower = 1&gt; N;                     // number of observation
+  vector&lt;lower = 0&gt;[N] n_traps;         // number of traps
+  int&lt;lower = 0&gt; complaints[N];         // number of complaints
+}
+
+parameters {
+  // Intercept and the slope of the linear predictor eta
+  real alpha;
+  real beta;
+}
+
+model {
+  // Let&#39;s create the linear predictor: eta
+  vector[N] eta = alpha + beta * n_traps;
+
+  /*Let&#39;s declare our outcome variable and its pdf. Poisson_log
+  function directly exponentiated the linear prediction*/
+  target += poisson_log_lpmf(complaints | eta);
+  
+  /*or equivalently
+
+  complaints ~ poisson_log(eta);
+
+  */
+
+  /*Let&#39;s declare our priors distributions. Let&#39;s put some reasonable
+  priors. In particular, we expect that for higher number of traps
+  there will be less complaints from people living in the building.*/
+  target += normal_lpdf(alpha | log(4), 1) +
+            normal_lpdf(beta | -0.25, 1);
+            
+  /*or equivalently
+
+  alpha ~ normal(log(4), 1);
+  beta ~ normal(-0.25, 1);
+
+  */
+}
+</code></pre>
+<div id="data-block" class="section level4">
+<h4><span class="header-section-number">1.4.3.1</span> Data block</h4>
+<p>As we can see, we declared the number of observations of our dataset as an integer constrained to be equal to or greater than <span class="math inline">\(1\)</span> (the program won’t work if the number of observations is 0 or negative, and that make sense because those value mean no data at hand or they would be non-senso.), whereas the number of traps is expressed as a vector of lenght N whouse values are constrained to be strictly positive (and that makes sense because a negative values won’t make any sense).</p>
+<p>The number of complaints has a curious expression. It is represented as an array that contains a vector of lenght equal to N filled with strictly positive integers, i.e. the numbere of complaints (which again cannot take a negative value). In Stan arrays are essentially “boxes” that contains objects (real numbers, vectors, matrices and so on). The elements of the objects must be of the same type. Here wr are using array syntax because the numbers of complaints are integers and Stan allows for vectors and matrices of only real numbers.</p>
+</div>
+<div id="parameters-block" class="section level4">
+<h4><span class="header-section-number">1.4.3.2</span> Parameters block</h4>
+<p>The parameters of the model are declared as real numbers and they represent the intercept and the slope of the linear predictor <span class="math inline">\(\eta\)</span> of our model.</p>
+</div>
+<div id="model-block" class="section level4">
+<h4><span class="header-section-number">1.4.3.3</span> Model block</h4>
+<p>First we expressed the linear predictor <span class="math inline">\(\eta\)</span> given by the product of a vector (the number of traps) and a scalar (the slope) plus a vector (the intercept). After that we define the likelihood of the data and the priors of the parameters. Both the likelihood and the priors will feed the objective of our inference, that here is expressed as “target”. Regarding the likelihood (first part of the target), we are telling to Stan to start by evaluating the log-likelihood (working with the log-likelihood is more computational stable) at an initial value (usually zero). After that initial evaluation, the target will be fed by the sum (not the product because we are working on the logarithm of the likelihood) of the contribution to the complete likelihood of each observation in the data. Regarding the priors, the reasoning is the same. Their contribution to the target is given by the values of the parameters drawn from the distribution that will affect eta, thus the impact of the observations on the likelihood.</p>
+<p>Thus, we can think to the target as something which is defined by initial evaluation of itself to a particular value and that is continuously fed by the observed data, through the likelihood, and the prior distributions.</p>
+<p>Likelihood and priors can also be expressed in a more familiar form, such as the one expressed in @ref(eq:1.7)) and given in the comment blocks.</p>
+<p>For now we stop here. We will see in the next lessons how to simulated data from our model using the generated quantities block. Now let’s compile the model and sample from the posterior distribution of the parameters. To do that, we need to save the Stan program into a separate file and call it into the <em>stan</em> function.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># A seed for reproducibility of the draws from the posterior</span>
+mcmc_seed &lt;-<span class="st"> </span><span class="dv">140509</span>
+
+<span class="co"># Compile the model in C++</span>
+simple_poisson_comp &lt;-<span class="st"> </span><span class="kw">stan_model</span>(
+  <span class="dt">file =</span> <span class="st">&quot;stan_programs/simple_poisson.stan&quot;</span>
+)
+
+simple_poisson &lt;-<span class="st"> </span><span class="kw">sampling</span>(
+  simple_poisson_comp,
+  <span class="dt">data =</span> pest_data_list,
+  <span class="dt">chains =</span> 1L,        <span class="co"># One chain for a quick sampling</span>
+  <span class="dt">seed =</span> mcmc_seed
+)</code></pre></div>
+<pre><code>#&gt; 
+#&gt; SAMPLING FOR MODEL &#39;simple_poisson&#39; NOW (CHAIN 1).
+#&gt; 
+#&gt; Gradient evaluation took 0 seconds
+#&gt; 1000 transitions using 10 leapfrog steps per transition would take 0 seconds.
+#&gt; Adjust your expectations accordingly!
+#&gt; 
+#&gt; 
+#&gt; Iteration:    1 / 2000 [  0%]  (Warmup)
+#&gt; Iteration:  200 / 2000 [ 10%]  (Warmup)
+#&gt; Iteration:  400 / 2000 [ 20%]  (Warmup)
+#&gt; Iteration:  600 / 2000 [ 30%]  (Warmup)
+#&gt; Iteration:  800 / 2000 [ 40%]  (Warmup)
+#&gt; Iteration: 1000 / 2000 [ 50%]  (Warmup)
+#&gt; Iteration: 1001 / 2000 [ 50%]  (Sampling)
+#&gt; Iteration: 1200 / 2000 [ 60%]  (Sampling)
+#&gt; Iteration: 1400 / 2000 [ 70%]  (Sampling)
+#&gt; Iteration: 1600 / 2000 [ 80%]  (Sampling)
+#&gt; Iteration: 1800 / 2000 [ 90%]  (Sampling)
+#&gt; Iteration: 2000 / 2000 [100%]  (Sampling)
+#&gt; 
+#&gt;  Elapsed Time: 0.256 seconds (Warm-up)
+#&gt;                0.285 seconds (Sampling)
+#&gt;                0.541 seconds (Total)</code></pre>
+<p>Let’s look at the posterior of the parameters.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">simple_poisson</code></pre></div>
+<pre><code>#&gt; Inference for Stan model: simple_poisson.
+#&gt; 1 chains, each with iter=2000; warmup=1000; thin=1; 
+#&gt; post-warmup draws per chain=1000, total post-warmup draws=1000.
+#&gt; 
+#&gt;          mean se_mean   sd    2.5%     25%     50%     75%   97.5% n_eff
+#&gt; alpha    2.57    0.01 0.16    2.24    2.47    2.58    2.69    2.86   232
+#&gt; beta    -0.19    0.00 0.02   -0.24   -0.21   -0.19   -0.18   -0.14   221
+#&gt; lp__  -351.03    0.06 1.01 -353.60 -351.49 -350.72 -350.30 -350.02   302
+#&gt;       Rhat
+#&gt; alpha    1
+#&gt; beta     1
+#&gt; lp__     1
+#&gt; 
+#&gt; Samples were drawn using NUTS(diag_e) at Mon Sep 17 20:12:01 2018.
+#&gt; For each parameter, n_eff is a crude measure of effective sample size,
+#&gt; and Rhat is the potential scale reduction factor on split chains (at 
+#&gt; convergence, Rhat=1).</code></pre>
+<p>These are summaries of the posterior distributions: mean, error associated to MCMC, standard deviation, quantiles.</p>
+<p>Let’s now plot histograms of the posterior of the parameters.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Store parameters alpha and beta into a matrix</span>
+post_pars &lt;-<span class="st"> </span><span class="kw">as.matrix</span>(
+  simple_poisson,
+  <span class="dt">pars =</span> <span class="kw">c</span>(<span class="st">&quot;alpha&quot;</span>, <span class="st">&quot;beta&quot;</span>)
+)
+
+<span class="kw">mcmc_hist</span>(post_pars)</code></pre></div>
+<p><img src="BDA_STAN_Pavia_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<p>Or the scatter plot of the bivariate distribution</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">mcmc_scatter</span>(post_pars)</code></pre></div>
+<p><img src="BDA_STAN_Pavia_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<p>Our goal for inference is to understand what the posterior distribution of the parameters of the model implies for the outcome and its simulated data (predictive data) from the model. Nevertheless, we need to check the behavior of the sampler: a pathological behavior means that the algorithm did not sample correctly from the posterior. Thus, interpreation of such models may be misleading, leading to biased inferece. In the next lesson we will see how to diagnose the algorithm used to draw from the posterior distribution of the paramters.</p>
+
+</div>
+</div>
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="index.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="day2.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"google": false,
+"linkedin": false,
+"weibo": false,
+"instapper": false,
+"vk": false,
+"all": ["facebook", "google", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"download": null,
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "";
+    if (src === "" || src === "true") src = "https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:" && /^https?:/.test(src))
+      src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>

@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html >
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>An Introduction to Bayesian Data Analysis with Stan</title>
+  <meta name="description" content="Notes and exercises from the course on Bayesian Data Analysis with Stan taken during the 1st International Summer School at the Department of Brain and Behavioral Sciences Medical Statistics and Genomic Unit, University of Pavia, Italy.">
+  <meta name="generator" content="bookdown 0.7 and GitBook 2.6.7">
+
+  <meta property="og:title" content="An Introduction to Bayesian Data Analysis with Stan" />
+  <meta property="og:type" content="book" />
+  
+  
+  <meta property="og:description" content="Notes and exercises from the course on Bayesian Data Analysis with Stan taken during the 1st International Summer School at the Department of Brain and Behavioral Sciences Medical Statistics and Genomic Unit, University of Pavia, Italy." />
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="An Introduction to Bayesian Data Analysis with Stan" />
+  
+  <meta name="twitter:description" content="Notes and exercises from the course on Bayesian Data Analysis with Stan taken during the 1st International Summer School at the Department of Brain and Behavioral Sciences Medical Statistics and Genomic Unit, University of Pavia, Italy." />
+  
+
+<meta name="author" content="Daniele Bottigliengo">
+
+
+<meta name="date" content="2018-09-17">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  
+  
+<link rel="prev" href="day1.html">
+<link rel="next" href="day3.html">
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">Bayesian Data Analysis with Stan</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Information on the course</a><ul>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#settings"><i class="fa fa-check"></i>Settings</a></li>
+</ul></li>
+<li class="chapter" data-level="1" data-path="day1.html"><a href="day1.html"><i class="fa fa-check"></i><b>1</b> Foundations of Bayesian inference in theory and practice and Stan software</a><ul>
+<li class="chapter" data-level="1.1" data-path="day1.html"><a href="day1.html#what-is-stan"><i class="fa fa-check"></i><b>1.1</b> What is Stan?</a></li>
+<li class="chapter" data-level="1.2" data-path="day1.html"><a href="day1.html#bayesian-workflow"><i class="fa fa-check"></i><b>1.2</b> Bayesian workflow</a></li>
+<li class="chapter" data-level="1.3" data-path="day1.html"><a href="day1.html#world-concentration-ofo-pm2.5-case-study"><i class="fa fa-check"></i><b>1.3</b> World concentration ofo PM2.5: case study</a><ul>
+<li class="chapter" data-level="1.3.1" data-path="day1.html"><a href="day1.html#exploratory-data-analysis-building-a-network-of-model"><i class="fa fa-check"></i><b>1.3.1</b> Exploratory Data Analysis: building a network of model</a></li>
+<li class="chapter" data-level="1.3.2" data-path="day1.html"><a href="day1.html#prior-predictive-checks-fake-data-can-be-as-valuable-as-real-data"><i class="fa fa-check"></i><b>1.3.2</b> Prior Predictive Checks: fake data can be as valuable as real data</a></li>
+</ul></li>
+<li class="chapter" data-level="1.4" data-path="day1.html"><a href="day1.html#pest-control-of-roaches-in-apartment-buildings-a-case-study"><i class="fa fa-check"></i><b>1.4</b> Pest control of roaches in apartment buildings: a case study</a><ul>
+<li class="chapter" data-level="1.4.1" data-path="day1.html"><a href="day1.html#the-goal"><i class="fa fa-check"></i><b>1.4.1</b> The goal</a></li>
+<li class="chapter" data-level="1.4.2" data-path="day1.html"><a href="day1.html#exploratory-data-analysis"><i class="fa fa-check"></i><b>1.4.2</b> Exploratory data analysis</a></li>
+<li class="chapter" data-level="1.4.3" data-path="day1.html"><a href="day1.html#the-model"><i class="fa fa-check"></i><b>1.4.3</b> The model</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="day2.html"><a href="day2.html"><i class="fa fa-check"></i><b>2</b> Bayesian applied regression models</a><ul>
+<li class="chapter" data-level="2.1" data-path="day2.html"><a href="day2.html#posterior-predictive-checks"><i class="fa fa-check"></i><b>2.1</b> Posterior predictive checks</a><ul>
+<li class="chapter" data-level="2.1.1" data-path="day2.html"><a href="day2.html#negative-binomial-model"><i class="fa fa-check"></i><b>2.1.1</b> Negative Binomial model</a></li>
+</ul></li>
+<li class="chapter" data-level="2.2" data-path="day2.html"><a href="day2.html#mcmc-algorithms"><i class="fa fa-check"></i><b>2.2</b> MCMC algorithms</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="day3.html"><a href="day3.html"><i class="fa fa-check"></i><b>3</b> Hierarchical/Multilevel modeling (part 1)</a><ul>
+<li class="chapter" data-level="3.1" data-path="day3.html"><a href="day3.html#pest-control-example-negative-binomial-model"><i class="fa fa-check"></i><b>3.1</b> Pest control example: negative-binomial model</a></li>
+<li class="chapter" data-level="3.2" data-path="day3.html"><a href="day3.html#pest-control-example-hierarchical-model-varying-intercept"><i class="fa fa-check"></i><b>3.2</b> Pest control example: hierarchical model (varying intercept)</a><ul>
+<li class="chapter" data-level="3.2.1" data-path="day3.html"><a href="day3.html#preparing-hierarchical-data-for-stan-program"><i class="fa fa-check"></i><b>3.2.1</b> Preparing hierarchical data for Stan program</a></li>
+<li class="chapter" data-level="3.2.2" data-path="day3.html"><a href="day3.html#centered-parametrization"><i class="fa fa-check"></i><b>3.2.2</b> Centered parametrization</a></li>
+<li class="chapter" data-level="3.2.3" data-path="day3.html"><a href="day3.html#non-centered-parametrization"><i class="fa fa-check"></i><b>3.2.3</b> Non-centered parametrization</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="day4.html"><a href="day4.html"><i class="fa fa-check"></i><b>4</b> Hierarchical/Multilevel modeling (part 2)</a><ul>
+<li class="chapter" data-level="4.1" data-path="day4.html"><a href="day4.html#varying-intercept-and-varying-slopes"><i class="fa fa-check"></i><b>4.1</b> Varying intercept and varying slopes</a></li>
+<li class="chapter" data-level="4.2" data-path="day4.html"><a href="day4.html#time-varying-effects-and-structured-priors"><i class="fa fa-check"></i><b>4.2</b> Time varying effects and structured priors</a></li>
+<li class="chapter" data-level="4.3" data-path="day4.html"><a href="day4.html#use-the-model"><i class="fa fa-check"></i><b>4.3</b> Use the model</a></li>
+<li class="chapter" data-level="4.4" data-path="day4.html"><a href="day4.html#exercises"><i class="fa fa-check"></i><b>4.4</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="day5.html"><a href="day5.html"><i class="fa fa-check"></i><b>5</b> Model comparison</a></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">An Introduction to Bayesian Data Analysis with Stan</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="day2" class="section level1">
+<h1><span class="header-section-number">Day 2</span> Bayesian applied regression models</h1>
+<div id="posterior-predictive-checks" class="section level2">
+<h2><span class="header-section-number">2.1</span> Posterior predictive checks</h2>
+<p>Posterior predictive check is a fundamental step of the Bayesian workflow to check if the fitted model makes sense. It basically works by simulating replicated data from the fitted model and by comparing them to the observed data. Once the simulation has been performed, the following question should arise:</p>
+<ul>
+<li>Are the simulated data plausible with the real data?</li>
+<li>Does our model make sense with our situation?</li>
+</ul>
+<p>Simulating fake data from the fitted model means that we must draw values from the posterior distribution of unknown but observable outcome data, i.e.</p>
+<span class="math display">\[\begin{equation}
+
+p \left( \widetilde{y} \vert y \right) = \int p \left( \widetilde{y} 
+\vert \theta \right) p \left( \theta  \vert y \right) d \theta
+
+\end{equation}\]</span>
+<p>Drawing from the posterior predictive distribution can be implemented as follows:</p>
+<ul>
+<li><p>Draw <span class="math inline">\(\theta^{*}\)</span> from the posterior <span class="math inline">\(p \left( \theta \vert y \right)\)</span></p></li>
+<li><p>Draw <span class="math inline">\(y^{*}\)</span> from the posterior predictive distribution <span class="math inline">\(p \left( y \vert \theta^{*} \right)\)</span></p></li>
+</ul>
+<p>If there are differences between the posterior predictive distribution and the empirical distribution of the observed data it means that the model isn’t able to accurately describe our data and it is probably misfitting or overfitting. How can we inspect these discrepancies?</p>
+<ul>
+<li><p>Graphical posterior predictive checks are a valuable tool to assess discrepancies between simulated data and real data.</p></li>
+<li><p>We can also compare some observed statistics and posterior predictive statistics, e.g. the mean of observed data and the distribution of mean from the data simulated with our model.</p></li>
+<li><p>In posterior predictive distribution we have many sources of uncertainty: about the parameters, given by the posterior distribution, and about the data, given by their variation and their noise.</p></li>
+</ul>
+<p><em>Posterior predictive check is used to see if the simulated data range among plausible value. Thus, we don’t want that the simulated data perfectly resemble the observed data, otherwise our model is very likely overfitting.</em></p>
+<p>Let’s come back to the case study of the pest control of apartment buildings. We are going to perform some posterior predictive checks to understand the implications of our simple poisson regression.</p>
+<p>To simulate replicated data from our model we need to add the <em>generated quantities</em> block in the Stan program.</p>
+<pre><code>/* Simple Poisson model generated quantities*/
+
+/*
+* Alternative to poisson_log_rng() that
+* avoids potential numerical problems during warmup
+*/
+functions {
+  int poisson_log_safe_rng(real eta) {
+    real pois_rate = exp(eta);
+    if (pois_rate &gt;= exp(20.79))
+      return -9;
+    return poisson_rng(pois_rate);
+  }
+}
+
+// Declare the structure of the data
+data {
+  int&lt;lower = 1&gt; N;                     // number of observation
+  vector&lt;lower = 0&gt;[N] n_traps;         // number of traps
+  int&lt;lower = 0&gt; complaints[N];         // number of complaints
+}
+
+// Declare the parameters of the model (the goal of our inferemce)
+parameters {
+  // Intercept and the slope of the linear predictor eta
+  real alpha;
+  real beta;
+}
+
+// Define the structure of the Poisson model: priors and likelihood
+model {
+  // Let&#39;s create the linear predictor: eta
+  vector[N] eta = alpha + beta * n_traps;
+
+  // likelihood
+  target += poisson_log_lpmf(complaints | eta);
+
+  // Priors on the parameters
+  target += normal_lpdf(alpha | log(4), 1) +
+            normal_lpdf(beta | -0.25, 1);
+}
+
+// Predictive posterior distributions in generated quantities
+generated quantities {
+
+  int y_rep[N];       // replicated y as array with vector of integers
+
+  // Simulate data from the fitted modedl
+  for (n in 1:N) {
+
+    real eta_n = alpha + beta * n_traps[n];   // linear predictor
+    y_rep[n] = poisson_log_safe_rng(eta_n);   // replicated complaints
+
+  }
+}</code></pre>
+<p>Now we generate posterior predictive values from our model and store them into a matrix.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Compile the model</span>
+simple_poisson_gen_quant_comp &lt;-<span class="st"> </span><span class="kw">stan_model</span>(
+  <span class="dt">file =</span> <span class="st">&quot;stan_programs/simple_poisson_gen_quant.stan&quot;</span>
+)
+
+<span class="co"># Sampling from the posterior</span>
+simple_poisson_gen_quant &lt;-<span class="st"> </span><span class="kw">sampling</span>(
+  simple_poisson_gen_quant_comp,
+  <span class="dt">data =</span> pest_data_list,
+  <span class="dt">chains =</span> 4L,             
+  <span class="dt">warmup =</span> 1000L,
+  <span class="dt">iter =</span> 2000L,
+  <span class="dt">seed =</span> mcmc_seed
+)
+
+<span class="co"># Get replicated data into a matrix</span>
+y_rep_simple_poisson &lt;-<span class="st"> </span><span class="kw">as.matrix</span>(
+  simple_poisson_gen_quant,
+  <span class="dt">pars =</span> <span class="kw">c</span>(<span class="st">&quot;y_rep&quot;</span>)
+)
+
+<span class="co"># Check the dimension</span>
+<span class="kw">dim</span>(y_rep_simple_poisson)</code></pre></div>
+<pre><code>#&gt; [1] 4000  120</code></pre>
+<p>Each row corresponds to a distribution of posterior predicted values given a combination of our parameters <span class="math inline">\(\theta\)</span> from the posterior <span class="math inline">\(p \left( \theta \vert y \right)\)</span>. Each column corresponds to a posterior predictive distribution of replicated data for one observation in the dataset. Thus, the posterior predictive distribution is like a distribution of datasets.</p>
+<p>Let’s plot some draws from the posterior predictive distribution and compare it with the observed data.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Posterior predictive checks</span>
+<span class="kw">ppc_dens_overlay</span>(
+  <span class="dt">y =</span> pest_data<span class="op">$</span>complaints, 
+  y_rep_simple_poisson[<span class="dv">1</span><span class="op">:</span><span class="dv">200</span>,]
+)</code></pre></div>
+<p><img src="BDA_STAN_Pavia_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+<p>As we can see, simulated data from our model do not resemble very well the distribution of the observed data.</p>
+<p>We can also compare some statistics. Given our example, zero complaints is a value of interest for the manager of the company, because it means no complaints. We can compare the proportion of zeros (no complaints) in the observed data with the distribution of zeros from the posterior predictive distribution.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Function that computes the proportion of zeros</span>
+prop_zero_fun &lt;-<span class="st"> </span><span class="cf">function</span>(x) <span class="kw">mean</span>(x <span class="op">==</span><span class="st"> </span><span class="dv">0</span>)
+
+<span class="co"># Compare the proportions</span>
+<span class="kw">ppc_stat</span>(
+  <span class="dt">y =</span> pest_data<span class="op">$</span>complaints,
+  <span class="dt">yrep =</span> y_rep_simple_poisson[<span class="dv">1</span><span class="op">:</span><span class="dv">200</span>,],
+  <span class="dt">stat =</span> <span class="st">&quot;prop_zero_fun&quot;</span>
+)</code></pre></div>
+<p><img src="BDA_STAN_Pavia_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
+<p>The graph above clearly shows that our model tends to underestimate the proportion of zero complaints.</p>
+<p>We can also plot the stanrdized values of the differences between the observed number of complaints and the predicted number of complaints (residuals).</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">mean_y_rep &lt;-<span class="st"> </span><span class="kw">colMeans</span>(y_rep_simple_poisson)
+
+std_resid &lt;-<span class="st"> </span>(pest_data<span class="op">$</span>complaints <span class="op">-</span><span class="st"> </span>mean_y_rep) <span class="op">/</span><span class="st"> </span><span class="kw">sqrt</span>(mean_y_rep)
+
+<span class="kw">qplot</span>(mean_y_rep, std_resid) <span class="op">+</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">hline_at</span>(<span class="dv">2</span>) <span class="op">+</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">hline_at</span>(<span class="op">-</span><span class="dv">2</span>) <span class="op">+</span>
+<span class="st">  </span><span class="kw">theme_bw</span>()</code></pre></div>
+<p><img src="BDA_STAN_Pavia_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
+<p>There are more positive than negative residuals, suggesting that our model tends to underestimate the number of complaints.</p>
+<p>We can use the rootogram to compare the observed and the expected number of complaints.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Comparison of observed and expected number of complaints</span>
+<span class="kw">ppc_rootogram</span>(
+  pest_data<span class="op">$</span>complaints,
+  <span class="dt">yrep =</span> y_rep_simple_poisson
+)</code></pre></div>
+<p><img src="BDA_STAN_Pavia_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
+<p>If the model had a good fit, we would had observed similar expected and observed count. However, we can see that our model tends to overestimate when there is a medium number of complaints, whereas it underestimates when there are few or lager complaints.</p>
+<p>We can further inspect our model by comparing the observed and predicted number of complaints (with relative uncertainty) across the number of traps.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ppc_intervals</span>(
+  <span class="dt">y =</span> pest_data<span class="op">$</span>complaints, 
+  <span class="dt">yrep =</span> y_rep_simple_poisson,
+  <span class="dt">x =</span> pest_data<span class="op">$</span>traps
+) <span class="op">+</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">labs</span>(
+    <span class="dt">x =</span> <span class="st">&quot;Number of traps&quot;</span>, 
+    <span class="dt">y =</span> <span class="st">&quot;Number of complaints&quot;</span>
+  )</code></pre></div>
+<p><img src="BDA_STAN_Pavia_files/figure-html/unnamed-chunk-16-1.png" width="672" /></p>
+<p>We can observe that our model predicts very badly the extreme of the data, i.e. few and large number of complaints.</p>
+<p>Graphical posterior predictive checks inform us that the model may not be a good choice for our problem at hand. We need to criticize our model and understand if some of assumptions we made can be revised.</p>
+<p>For example, building may be very different from each other and it is better to incorporate this information in the model. To see if that makes sense, we can plot the relationship between the squared foot of the building and the number of complaints.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ggplot</span>(
+  <span class="dt">data =</span> pest_data, 
+  <span class="dt">mapping =</span> <span class="kw">aes</span>(
+    <span class="dt">x =</span> <span class="kw">log</span>(total_sq_foot), 
+    <span class="dt">y =</span> <span class="kw">log1p</span>(complaints)
+  )
+) <span class="op">+</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">geom_point</span>() <span class="op">+</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">geom_smooth</span>(
+    <span class="dt">method =</span> <span class="st">&quot;lm&quot;</span>, 
+    <span class="dt">se =</span> <span class="ot">FALSE</span>
+  ) <span class="op">+</span>
+<span class="st">  </span><span class="kw">theme_bw</span>()</code></pre></div>
+<p><img src="BDA_STAN_Pavia_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
+<p>It seems that the bigger the apartment the greater the number of complaints. Maybe bigger building may be subjected to a higher number of roaches, and thus more complaints. We can think the size of the aparment as an initial exposure that likely influnce the number of complaints and we can add it in the model as an offset. Moreover, we can also take into account the level of the apartment in the building. Here we are going to rescale the square foot measure such that it is on a unit scale making computation more feasible.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">pest_data<span class="op">$</span>log_sq_foot &lt;-<span class="st"> </span><span class="kw">log</span>(pest_data<span class="op">$</span>total_sq_foot<span class="op">/</span><span class="fl">1e4</span>)</code></pre></div>
+<p>Following the steps of the Bayesian workflow, we start by simulating fake data from the prior predictive distribution. We can do it in Stan by writing in the program the number of simulated observation in the data block and declaring the priors and the simulated data in the generated quantities block.</p>
+<pre><code>/* Generating data from a multiple Poisson regression model*/
+
+/*
+* Alternative to poisson_log_rng() that
+* avoids potential numerical problems during warmup
+*/
+functions {
+  int poisson_log_safe_rng(real eta) {
+    real pois_rate = exp(eta);
+    if (pois_rate &gt;= exp(20.79))
+      return -9;
+    return poisson_rng(pois_rate);
+  }
+}
+
+data {
+  // Number of observations
+  int&lt;lower=1&gt; N;
+}
+
+model{
+
+}
+
+// Predictive posterior distributions in generated quantities
+generated quantities {
+
+  // Declare simulated data
+  vector[N] log_sq_foot;
+  int live_in_super[N];
+  int n_traps[N];
+  int complaints[N];
+
+  // Generate parameters values from the prior predictive distribution
+  real alpha = normal_rng(log(4), 0.1);
+  real beta = normal_rng(-0.25, 0.1);
+  real beta_super = normal_rng(-0.5, 0.1);
+
+  // Generate simulated values of the outcome (number of complaints)
+  for(n in 1:N) {
+
+    // Generate fake data
+    log_sq_foot[n] = normal_rng(1.5, 0.1);
+    live_in_super[n] = bernoulli_rng(0.5);
+    n_traps[n] = poisson_rng(8);
+
+    // Generate simulated number of complaints
+    complaints[n] = poisson_log_safe_rng(alpha +
+                    log_sq_foot[n] + beta * n_traps[n] +
+                    beta_super * live_in_super[n]);
+  }
+}
+</code></pre>
+<p>We now simulate fake data from the model.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Compile the model</span>
+multi_poisson_dgp_comp &lt;-<span class="st"> </span><span class="kw">stan_model</span>(
+  <span class="st">&quot;stan_programs/multiple_poisson_dgp.stan&quot;</span>
+)
+
+<span class="co"># Sampling from the posterior</span>
+multi_poisson_dgp &lt;-<span class="st"> </span><span class="kw">sampling</span>(
+  multi_poisson_dgp_comp,
+  <span class="dt">data =</span> <span class="kw">list</span>(<span class="dt">N =</span> <span class="kw">nrow</span>(pest_data)),
+  <span class="dt">chains =</span> <span class="dv">1</span>,
+  <span class="dt">cores =</span> <span class="dv">1</span>,
+  <span class="dt">iter =</span> <span class="dv">1</span>,
+  <span class="dt">algorithm =</span> <span class="st">&#39;Fixed_param&#39;</span>,
+  <span class="dt">seed =</span> <span class="dv">123</span>
+)</code></pre></div>
+<pre><code>#&gt; 
+#&gt; SAMPLING FOR MODEL &#39;multiple_poisson_dgp&#39; NOW (CHAIN 1).
+#&gt; Iteration: 1 / 1 [100%]  (Sampling)
+#&gt; 
+#&gt;  Elapsed Time: 0 seconds (Warm-up)
+#&gt;                0 seconds (Sampling)
+#&gt;                0 seconds (Total)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Get the fake data</span>
+fake_data_pest &lt;-<span class="st"> </span>rstan<span class="op">::</span><span class="kw">extract</span>(multi_poisson_dgp)</code></pre></div>
+<p>Now we prepare the data into a list to be passed to Stan.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Take only numbers from the first iteration</span>
+stan_fake_data &lt;-<span class="st"> </span><span class="kw">list</span>(
+  <span class="dt">N =</span> <span class="kw">nrow</span>(pest_data),
+  <span class="dt">log_sq_foot =</span> fake_data_pest<span class="op">$</span>log_sq_foot[<span class="dv">1</span>, ],
+  <span class="dt">live_in_super =</span> fake_data_pest<span class="op">$</span>live_in_super[<span class="dv">1</span>, ],
+  <span class="dt">n_traps =</span> fake_data_pest<span class="op">$</span>n_traps[<span class="dv">1</span>, ],
+  <span class="dt">complaints =</span> fake_data_pest<span class="op">$</span>complaints[<span class="dv">1</span>, ]
+)</code></pre></div>
+<p>And we fit our model to the fake data. If our model is able to recover the parameters the prior distribution of the parameters than it means that our model is reasonable and we can fit it to the real data. Below the Stan program of the model</p>
+<pre><code>/* Multi Poisson model*/
+
+/*
+* Alternative to poisson_log_rng() that
+* avoids potential numerical problems during warmup
+*/
+functions {
+  int poisson_log_safe_rng(real eta) {
+    real pois_rate = exp(eta);
+    if (pois_rate &gt;= exp(20.79))
+      return -9;
+    return poisson_rng(pois_rate);
+  }
+}
+
+// Declare the structure of the data
+data {
+  int&lt;lower = 1&gt; N;                       // number of observation
+  vector&lt;lower = 0&gt;[N] n_traps;           // number of traps
+  int&lt;lower = 0&gt; complaints[N];           // number of complaints
+  vector[N] log_sq_foot;                  // log of square foot building
+  vector&lt;lower = 0, upper = 1&gt;[N] live_in_super; // level of the apartment
+}
+
+// Declare the parameters of the model (the goal of our inferemce)
+parameters {
+  // Intercept and the slope of the linear predictor eta
+  real alpha;
+  real beta;
+  real beta_super;
+}
+
+// Define the structure of the Poisson model: priors and likelihood
+model {
+  // Let&#39;s create the linear predictor: eta
+  vector[N] eta = alpha + 
+                  beta * n_traps +
+                  beta_super * live_in_super +
+                  log_sq_foot;
+
+  /*Let&#39;s declare our outcome variable and its pdf. Poisson_log
+  function directly exponentiated the linear prediction*/
+  target += poisson_log_lpmf(complaints | eta);
+  /*or equivalently
+
+  complaints ~ poisson_log(eta);
+
+  */
+
+  /*Let&#39;s declare our priors distributions. Let&#39;s put some reasonable
+  priors. In particular, we expect that for higher number of traps
+  there will be less complaints from people living in the building.*/
+  target += normal_lpdf(alpha | log(4), 1) +
+            normal_lpdf(beta | -0.25, 1) +
+            normal_lpdf(beta_super | -0.5, 1);
+
+  /*or equivalently
+
+  alpha ~ normal(log(4), 1);
+  beta ~ normal(-0.25, 1);
+
+  */
+}
+
+// Simulate replicated data from the model
+generated quantities {
+
+  int y_rep[N];
+  
+  for (n in 1:N) {
+  
+    real eta_rep = alpha + 
+                   beta * n_traps[n] + 
+                   beta_super * live_in_super[n] +
+                   log_sq_foot[n];
+                   
+    y_rep[n] = poisson_log_safe_rng(eta_rep);
+  
+  }
+
+}
+</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Compile the model</span>
+multi_poisson_comp &lt;-<span class="st"> </span><span class="kw">stan_model</span>(
+  <span class="st">&quot;stan_programs/multiple_poisson_regression.stan&quot;</span>
+)
+
+<span class="co"># Sampling from the posterior</span>
+multi_poisson_fake &lt;-<span class="st"> </span><span class="kw">sampling</span>(
+  <span class="dt">object =</span> multi_poisson_comp,
+  <span class="dt">data =</span> stan_fake_data,
+  <span class="dt">chains =</span> 4L,
+  <span class="dt">warmup =</span> 1000L,
+  <span class="dt">iter =</span> 2000L
+) </code></pre></div>
+<p>Does the model recover the parameters of the prior?</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">post_alpha_betas &lt;-<span class="st"> </span><span class="kw">as.matrix</span>(
+  multi_poisson_fake,
+  <span class="dt">pars =</span> <span class="kw">c</span>(<span class="st">&quot;alpha&quot;</span>, <span class="st">&quot;beta&quot;</span>, <span class="st">&quot;beta_super&quot;</span>)
+)
+
+true_alpha_beta &lt;-<span class="st"> </span><span class="kw">c</span>(
+  fake_data_pest<span class="op">$</span>alpha,
+  fake_data_pest<span class="op">$</span>beta,
+  fake_data_pest<span class="op">$</span>beta_super
+)
+
+<span class="kw">mcmc_recover_hist</span>(
+  <span class="dt">x =</span> post_alpha_betas,
+  <span class="dt">true =</span> true_alpha_beta
+)</code></pre></div>
+<p><img src="BDA_STAN_Pavia_files/figure-html/unnamed-chunk-22-1.png" width="672" /></p>
+<p>Yes! Let’s fit the model to the real data and do posterior predictive checks.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Prepare the data into a list</span>
+pest_data_list_multi &lt;-<span class="st"> </span><span class="kw">list</span>(
+  <span class="dt">N =</span> <span class="kw">nrow</span>(pest_data),
+  <span class="dt">n_traps =</span> pest_data<span class="op">$</span>traps,
+  <span class="dt">log_sq_foot =</span> <span class="kw">sqrt</span>(pest_data<span class="op">$</span>total_sq_foot<span class="op">/</span><span class="fl">1e4</span>), <span class="co"># rescale to unit scale</span>
+  <span class="dt">live_in_super =</span> pest_data<span class="op">$</span>live_in_super,
+  <span class="dt">complaints =</span> pest_data<span class="op">$</span>complaints
+)
+
+<span class="co"># Sampling from the posterior</span>
+multi_poisson &lt;-<span class="st"> </span><span class="kw">sampling</span>(
+  multi_poisson_comp,
+  <span class="dt">data =</span> pest_data_list_multi,
+  <span class="dt">chains =</span> 4L,
+  <span class="dt">warmup =</span> 1000L,
+  <span class="dt">iter =</span> 2000L,
+  <span class="dt">seed =</span> mcmc_seed
+)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Get replicated data</span>
+y_rep &lt;-<span class="st"> </span><span class="kw">as.matrix</span>(
+  multi_poisson,
+  <span class="dt">pars =</span> <span class="kw">c</span>(<span class="st">&quot;y_rep&quot;</span>)
+)
+
+<span class="co"># Posterior predictive checks</span>
+<span class="kw">ppc_dens_overlay</span>(
+  <span class="dt">y =</span> pest_data<span class="op">$</span>complaints, 
+  y_rep[<span class="dv">1</span><span class="op">:</span><span class="dv">200</span>,]
+)</code></pre></div>
+<p><img src="BDA_STAN_Pavia_files/figure-html/unnamed-chunk-24-1.png" width="672" /></p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Function that computes the proportion of zeros</span>
+prop_zero_fun &lt;-<span class="st"> </span><span class="cf">function</span>(x) <span class="kw">mean</span>(x <span class="op">==</span><span class="st"> </span><span class="dv">0</span>)
+
+<span class="co"># Compare the proportions</span>
+<span class="kw">ppc_stat</span>(
+  <span class="dt">y =</span> pest_data<span class="op">$</span>complaints,
+  <span class="dt">yrep =</span> y_rep[<span class="dv">1</span><span class="op">:</span><span class="dv">200</span>,],
+  <span class="dt">stat =</span> <span class="st">&quot;prop_zero_fun&quot;</span>
+)</code></pre></div>
+<p><img src="BDA_STAN_Pavia_files/figure-html/unnamed-chunk-25-1.png" width="672" /></p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ppc_intervals</span>(
+  <span class="dt">y =</span> pest_data<span class="op">$</span>complaints, 
+  <span class="dt">yrep =</span> y_rep,
+  <span class="dt">x =</span> pest_data<span class="op">$</span>traps
+) <span class="op">+</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">labs</span>(
+    <span class="dt">x =</span> <span class="st">&quot;Number of traps&quot;</span>, 
+    <span class="dt">y =</span> <span class="st">&quot;Number of complaints&quot;</span>
+  )</code></pre></div>
+<p><img src="BDA_STAN_Pavia_files/figure-html/unnamed-chunk-26-1.png" width="672" /></p>
+<p>The model still has some problems, in particular at the tails of the data: there is still an high number of complaints that our model is not able to account for.</p>
+<div id="negative-binomial-model" class="section level3">
+<h3><span class="header-section-number">2.1.1</span> Negative Binomial model</h3>
+<p>We may criticize the assumption of our model: constant mean and variance across observations. We can use a Negative Binomial (NB) distribution to model the number of complaints allowing for overdispersion, i.e. variance not constant across observations. The model can be formalized as follows:</p>
+<p><span class="math display">\[
+\begin{align*}
+\text{complaints}_{b,t} &amp; \sim \text{Neg-Binomial}(\lambda_{b,t}, \phi) \\
+\lambda_{b,t} &amp; = \exp{(\eta_{b,t})} \\
+\eta_{b,t} &amp;= \alpha + \beta \, {\rm traps}_{b,t} + \beta_{\rm super} 
+\, {\rm super}_{b} + \text{log_sq_foot}_{b}
+\end{align*}
+\]</span></p>
+<p>We can write the NB function in Stan as <span class="math inline">\(\texttt{neg_binomial_2_log}(\text{ints} \, y, \text{reals} \, \eta, \text{reals} \, \phi)\)</span> in Stan. Like the <code>poisson_log</code> function, this negative binomial mass function that is parameterized in terms of its log-mean, <span class="math inline">\(\eta\)</span>, but it also has a precision <span class="math inline">\(\phi\)</span> such that</p>
+<span class="math display">\[\begin{equation}
+\mathbb{E}[y] \, = \lambda = \exp(\eta)
+\end{equation}\]</span>
+<span class="math display">\[\begin{equation}
+\text{Var}[y] = \lambda + \lambda^2/\phi = \exp(\eta) + \exp(\eta)^2 /
+\phi.
+\end{equation}\]</span>
+<p>As <span class="math inline">\(\phi\)</span> gets larger the term <span class="math inline">\(\lambda^2 / \phi\)</span> approaches zero and so the variance of the negative-binomial approaches <span class="math inline">\(\lambda\)</span>, i.e., the NB gets closer and closer to the Poisson.</p>
+</div>
+</div>
+<div id="mcmc-algorithms" class="section level2">
+<h2><span class="header-section-number">2.2</span> MCMC algorithms</h2>
+<p>Once we have very complex model with high number of parameters it is very difficult to get an analytic approach to sample from the posterior distribution. In such case, the posterior may be very complex and sampling from it becomes very complicated.</p>
+<p>Regarding our pest control examples, suppose we want to allow for different intercepts across buildings, or different slopes. Thus, the dimensionality of the parameter space becomes high and doing numerical computation in such domains is very difficult. We need to find something that approximate the “surface” of the posterior distribution of the parameter space, something able to explore the most important region of such distribution.</p>
+<p>How can we do when we have a very strange and complicated surface that we don’t know how it looks like?</p>
+<p>Markov Chain Monte Carlo (MCMC) algorithms are useful tool to deal with such task. Stan samples from the posterior using the Hamiltonian Monte Carlo (HMC) algorithm, in particular the efficient No-U Turn Sampler (NUTS). For further details on the algorithm, we highly suggest the following readings: Hoffman and Gelman (2014)  and Betancourt (2018). Here is a very nice example of <a href="https://chi-feng.github.io/mcmc-demo/app.html#HamiltonianMC,banana">how HMC works</a>.</p>
+<p>The algorithm may incurs in some problems during the sampling process. If the sampler was not able to explore the surface of the posterior, then we get biased inference. Thus, it is very important to diagnose the sampling process of the algorithm to look for potential patological behaviors that could interfer our final goal.</p>
+<p>In the next lesson we will see how to build hierarchical models and how to diagnose the patological behaviours of the algorithm during the sampling.</p>
+
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="day1.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="day3.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"google": false,
+"linkedin": false,
+"weibo": false,
+"instapper": false,
+"vk": false,
+"all": ["facebook", "google", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"download": null,
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "";
+    if (src === "" || src === "true") src = "https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:" && /^https?:/.test(src))
+      src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>

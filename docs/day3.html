@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html >
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>An Introduction to Bayesian Data Analysis with Stan</title>
+  <meta name="description" content="Notes and exercises from the course on Bayesian Data Analysis with Stan taken during the 1st International Summer School at the Department of Brain and Behavioral Sciences Medical Statistics and Genomic Unit, University of Pavia, Italy.">
+  <meta name="generator" content="bookdown 0.7 and GitBook 2.6.7">
+
+  <meta property="og:title" content="An Introduction to Bayesian Data Analysis with Stan" />
+  <meta property="og:type" content="book" />
+  
+  
+  <meta property="og:description" content="Notes and exercises from the course on Bayesian Data Analysis with Stan taken during the 1st International Summer School at the Department of Brain and Behavioral Sciences Medical Statistics and Genomic Unit, University of Pavia, Italy." />
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="An Introduction to Bayesian Data Analysis with Stan" />
+  
+  <meta name="twitter:description" content="Notes and exercises from the course on Bayesian Data Analysis with Stan taken during the 1st International Summer School at the Department of Brain and Behavioral Sciences Medical Statistics and Genomic Unit, University of Pavia, Italy." />
+  
+
+<meta name="author" content="Daniele Bottigliengo">
+
+
+<meta name="date" content="2018-09-17">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  
+  
+<link rel="prev" href="day2.html">
+<link rel="next" href="day4.html">
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">Bayesian Data Analysis with Stan</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Information on the course</a><ul>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#settings"><i class="fa fa-check"></i>Settings</a></li>
+</ul></li>
+<li class="chapter" data-level="1" data-path="day1.html"><a href="day1.html"><i class="fa fa-check"></i><b>1</b> Foundations of Bayesian inference in theory and practice and Stan software</a><ul>
+<li class="chapter" data-level="1.1" data-path="day1.html"><a href="day1.html#what-is-stan"><i class="fa fa-check"></i><b>1.1</b> What is Stan?</a></li>
+<li class="chapter" data-level="1.2" data-path="day1.html"><a href="day1.html#bayesian-workflow"><i class="fa fa-check"></i><b>1.2</b> Bayesian workflow</a></li>
+<li class="chapter" data-level="1.3" data-path="day1.html"><a href="day1.html#world-concentration-ofo-pm2.5-case-study"><i class="fa fa-check"></i><b>1.3</b> World concentration ofo PM2.5: case study</a><ul>
+<li class="chapter" data-level="1.3.1" data-path="day1.html"><a href="day1.html#exploratory-data-analysis-building-a-network-of-model"><i class="fa fa-check"></i><b>1.3.1</b> Exploratory Data Analysis: building a network of model</a></li>
+<li class="chapter" data-level="1.3.2" data-path="day1.html"><a href="day1.html#prior-predictive-checks-fake-data-can-be-as-valuable-as-real-data"><i class="fa fa-check"></i><b>1.3.2</b> Prior Predictive Checks: fake data can be as valuable as real data</a></li>
+</ul></li>
+<li class="chapter" data-level="1.4" data-path="day1.html"><a href="day1.html#pest-control-of-roaches-in-apartment-buildings-a-case-study"><i class="fa fa-check"></i><b>1.4</b> Pest control of roaches in apartment buildings: a case study</a><ul>
+<li class="chapter" data-level="1.4.1" data-path="day1.html"><a href="day1.html#the-goal"><i class="fa fa-check"></i><b>1.4.1</b> The goal</a></li>
+<li class="chapter" data-level="1.4.2" data-path="day1.html"><a href="day1.html#exploratory-data-analysis"><i class="fa fa-check"></i><b>1.4.2</b> Exploratory data analysis</a></li>
+<li class="chapter" data-level="1.4.3" data-path="day1.html"><a href="day1.html#the-model"><i class="fa fa-check"></i><b>1.4.3</b> The model</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="day2.html"><a href="day2.html"><i class="fa fa-check"></i><b>2</b> Bayesian applied regression models</a><ul>
+<li class="chapter" data-level="2.1" data-path="day2.html"><a href="day2.html#posterior-predictive-checks"><i class="fa fa-check"></i><b>2.1</b> Posterior predictive checks</a><ul>
+<li class="chapter" data-level="2.1.1" data-path="day2.html"><a href="day2.html#negative-binomial-model"><i class="fa fa-check"></i><b>2.1.1</b> Negative Binomial model</a></li>
+</ul></li>
+<li class="chapter" data-level="2.2" data-path="day2.html"><a href="day2.html#mcmc-algorithms"><i class="fa fa-check"></i><b>2.2</b> MCMC algorithms</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="day3.html"><a href="day3.html"><i class="fa fa-check"></i><b>3</b> Hierarchical/Multilevel modeling (part 1)</a><ul>
+<li class="chapter" data-level="3.1" data-path="day3.html"><a href="day3.html#pest-control-example-negative-binomial-model"><i class="fa fa-check"></i><b>3.1</b> Pest control example: negative-binomial model</a></li>
+<li class="chapter" data-level="3.2" data-path="day3.html"><a href="day3.html#pest-control-example-hierarchical-model-varying-intercept"><i class="fa fa-check"></i><b>3.2</b> Pest control example: hierarchical model (varying intercept)</a><ul>
+<li class="chapter" data-level="3.2.1" data-path="day3.html"><a href="day3.html#preparing-hierarchical-data-for-stan-program"><i class="fa fa-check"></i><b>3.2.1</b> Preparing hierarchical data for Stan program</a></li>
+<li class="chapter" data-level="3.2.2" data-path="day3.html"><a href="day3.html#centered-parametrization"><i class="fa fa-check"></i><b>3.2.2</b> Centered parametrization</a></li>
+<li class="chapter" data-level="3.2.3" data-path="day3.html"><a href="day3.html#non-centered-parametrization"><i class="fa fa-check"></i><b>3.2.3</b> Non-centered parametrization</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="day4.html"><a href="day4.html"><i class="fa fa-check"></i><b>4</b> Hierarchical/Multilevel modeling (part 2)</a><ul>
+<li class="chapter" data-level="4.1" data-path="day4.html"><a href="day4.html#varying-intercept-and-varying-slopes"><i class="fa fa-check"></i><b>4.1</b> Varying intercept and varying slopes</a></li>
+<li class="chapter" data-level="4.2" data-path="day4.html"><a href="day4.html#time-varying-effects-and-structured-priors"><i class="fa fa-check"></i><b>4.2</b> Time varying effects and structured priors</a></li>
+<li class="chapter" data-level="4.3" data-path="day4.html"><a href="day4.html#use-the-model"><i class="fa fa-check"></i><b>4.3</b> Use the model</a></li>
+<li class="chapter" data-level="4.4" data-path="day4.html"><a href="day4.html#exercises"><i class="fa fa-check"></i><b>4.4</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="day5.html"><a href="day5.html"><i class="fa fa-check"></i><b>5</b> Model comparison</a></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">An Introduction to Bayesian Data Analysis with Stan</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="day3" class="section level1">
+<h1><span class="header-section-number">Day 3</span> Hierarchical/Multilevel modeling (part 1)</h1>
+<div id="pest-control-example-negative-binomial-model" class="section level2">
+<h2><span class="header-section-number">3.1</span> Pest control example: negative-binomial model</h2>
+<p>We now try to fit a NB to the data. We will start by simulating fake data from the prior predictive distribution. The Stan program to generate fake data is written as follows:</p>
+<pre><code>// Multi NB data generating process
+
+functions {
+  /*
+  * Alternative to neg_binomial_2_log_rng() that
+  * avoids potential numerical problems during warmup
+  */
+  int neg_binomial_2_log_safe_rng(real eta, real phi) {
+    real gamma_rate = gamma_rng(phi, phi / exp(eta));
+    if (gamma_rate &gt;= exp(20.79))
+      return -9;
+
+    return poisson_rng(gamma_rate);
+  }
+}
+
+
+data {
+  int&lt;lower = 1&gt; N;         // Number of observations
+}
+
+parameters {
+}
+
+model {
+}
+
+generated quantities {
+
+  // Declare simulated variables
+  vector[N] log_sq_foot;
+  int live_in_super[N];
+  int traps[N];
+  int complaints[N];
+
+  // Generate parameter values from the prior predictive distribution
+  real alpha = normal_rng(log(4), 0.1);
+  real beta = normal_rng(-0.25, 0.1);
+  real beta_super = normal_rng(-0.5, 0.1);
+  real inv_phi = fabs(normal_rng(0, 1));
+
+  // Generate fake data
+  for(n in 1:N) {
+
+    // Generate covariates
+    log_sq_foot[n] = normal_rng(1.5, 0.1);
+    live_in_super[n] = bernoulli_rng(0.5);
+    traps[n] = poisson_rng(8);
+
+    // Generate outcome
+    complaints[n] = neg_binomial_2_log_safe_rng(
+      alpha +
+      beta * traps[n] +
+      beta_super * live_in_super[n] +
+      log_sq_foot[n],
+      inv(inv_phi)
+    );
+  }
+}</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Compile the model</span>
+multi_NB_comp_dgp &lt;-<span class="st"> </span><span class="kw">stan_model</span>(
+  <span class="dt">file =</span> <span class="st">&quot;stan_programs/multi_nb_dgp.stan&quot;</span>
+)
+
+<span class="co"># Sampling from the prior predictive distributions</span>
+fitted_fake_data_pest_NB &lt;-<span class="st"> </span><span class="kw">sampling</span>(
+  <span class="dt">object =</span> multi_NB_comp_dgp,
+  <span class="dt">data =</span> <span class="kw">list</span>(<span class="dt">N =</span> <span class="kw">nrow</span>(pest_data)),
+  <span class="dt">chains =</span> <span class="dv">1</span>,
+  <span class="dt">cores =</span> <span class="dv">1</span>,
+  <span class="dt">iter =</span> <span class="dv">1</span>,
+  <span class="dt">algorithm =</span> <span class="st">&#39;Fixed_param&#39;</span>,
+  <span class="dt">seed =</span> <span class="dv">123</span>
+)</code></pre></div>
+<pre><code>#&gt; 
+#&gt; SAMPLING FOR MODEL &#39;multi_nb_dgp&#39; NOW (CHAIN 1).
+#&gt; Iteration: 1 / 1 [100%]  (Sampling)
+#&gt; 
+#&gt;  Elapsed Time: 0 seconds (Warm-up)
+#&gt;                0 seconds (Sampling)
+#&gt;                0 seconds (Total)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Get the fake data</span>
+fake_data_pest_NB &lt;-<span class="st"> </span>rstan<span class="op">::</span><span class="kw">extract</span>(fitted_fake_data_pest_NB)</code></pre></div>
+<p>Let’s now write the Stan program of the model we want to fit.</p>
+<pre><code>// Multiple NB regression
+
+functions {
+  /*
+  * Alternative to neg_binomial_2_log_rng() that
+  * avoids potential numerical problems during warmup
+  */
+  int neg_binomial_2_log_safe_rng(real eta, real phi) {
+    real gamma_rate = gamma_rng(phi, phi / exp(eta));
+    if (gamma_rate &gt;= exp(20.79))
+      return -9;
+
+    return poisson_rng(gamma_rate);
+  }
+}
+
+data {
+
+  int&lt;lower = 1&gt; N;             // number of observations
+  vector[N] log_sq_foot;        // log square foot of the building
+  vector&lt;lower = 0, upper = 1&gt;[N] live_in_super; // is the bulding in super?
+  vector&lt;lower = 0&gt;[N] traps;     // number of traps in the building
+  int&lt;lower = 0&gt; complaints[N];   // number of complaints in the building
+
+}
+
+parameters {
+
+  real alpha;                 // intercept
+  real beta;                  // coefficients on the traps
+  real beta_super;            // coefficients on live in super
+  real&lt;lower = 0&gt; inv_phi;    // inverse of phi coefficients
+
+}
+
+transformed parameters {
+
+  real phi = inv(inv_phi);    // phi coefficient
+
+}
+
+model {
+
+  // Linear predictor
+  vector[N] eta = alpha +
+                  beta * traps +
+                  beta_super * live_in_super +
+                  log_sq_foot;
+
+  // Priors
+  target += normal_lpdf(alpha | log(4), 1) +
+            normal_lpdf(beta | -0.25, 1) +
+            normal_lpdf(beta_super | -0.5, 1) +
+            normal_lpdf(inv_phi | 0, 1);
+
+  // Likelihood
+  target += neg_binomial_2_log_lpmf(complaints| eta, phi);
+
+}
+
+generated quantities {
+
+  // Declare simulated data from the model
+  int y_rep[N];
+
+  for(n in 1:N) {
+
+    real eta_rep = alpha +
+                   beta * traps[n] +
+                   beta_super * live_in_super[n] +
+                   log_sq_foot[n];
+
+    y_rep[n] = neg_binomial_2_log_safe_rng(eta_rep, phi);
+
+  }
+}
+
+</code></pre>
+<p>And we fit it to the fake data</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Create a list to pass to Stan program</span>
+fake_data_pest_NB_list &lt;-<span class="st"> </span><span class="kw">list</span>(
+  <span class="dt">N =</span> <span class="kw">nrow</span>(pest_data),
+  <span class="dt">log_sq_foot =</span> fake_data_pest_NB<span class="op">$</span>log_sq_foot[<span class="dv">1</span>, ],
+  <span class="dt">live_in_super =</span> fake_data_pest_NB<span class="op">$</span>live_in_super[<span class="dv">1</span>, ],
+  <span class="dt">traps =</span> fake_data_pest_NB<span class="op">$</span>traps[<span class="dv">1</span>, ],
+  <span class="dt">complaints =</span> fake_data_pest_NB<span class="op">$</span>complaints[<span class="dv">1</span>, ]
+)
+
+<span class="co"># Compile the model</span>
+multi_NB_reg_comp &lt;-<span class="st"> </span><span class="kw">stan_model</span>(
+  <span class="dt">file =</span> <span class="st">&quot;stan_programs/multi_nb_regression.stan&quot;</span>
+)
+
+<span class="co"># Sampling from the posterior</span>
+fitted_model_NB_reg_fake &lt;-<span class="st"> </span><span class="kw">sampling</span>(
+  <span class="dt">object =</span> multi_NB_reg_comp,
+  <span class="dt">data =</span> fake_data_pest_NB_list,
+  <span class="dt">warmup =</span> 1000L,
+  <span class="dt">iter =</span> 2000L,
+  <span class="dt">chains =</span> 4L,
+  <span class="dt">seed =</span> mcmc_seed
+)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">post_alpha_betas &lt;-<span class="st"> </span><span class="kw">as.matrix</span>(
+  fitted_model_NB_reg_fake,
+  <span class="dt">pars =</span> <span class="kw">c</span>(<span class="st">&quot;alpha&quot;</span>, <span class="st">&quot;beta&quot;</span>, <span class="st">&quot;beta_super&quot;</span>, <span class="st">&quot;inv_phi&quot;</span>)
+)
+
+true_alpha_beta &lt;-<span class="st"> </span><span class="kw">c</span>(
+  fake_data_pest_NB<span class="op">$</span>alpha,
+  fake_data_pest_NB<span class="op">$</span>beta,
+  fake_data_pest_NB<span class="op">$</span>beta_super,
+  fake_data_pest_NB<span class="op">$</span>inv_phi
+)
+
+<span class="kw">mcmc_recover_hist</span>(
+  <span class="dt">x =</span> post_alpha_betas,
+  <span class="dt">true =</span> true_alpha_beta
+)</code></pre></div>
+<p><img src="BDA_STAN_Pavia_files/figure-html/unnamed-chunk-29-1.png" width="672" /></p>
+<p>The model recover the values of the parameters. Let’s now fit the model to the real data.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># List of data to pass to the model</span>
+pest_data_list_multi &lt;-<span class="st"> </span><span class="kw">list</span>(
+  <span class="dt">N =</span> <span class="kw">nrow</span>(pest_data),
+  <span class="dt">traps =</span> pest_data<span class="op">$</span>traps,
+  <span class="dt">complaints =</span> pest_data<span class="op">$</span>complaints,
+  <span class="dt">log_sq_foot =</span> <span class="kw">sqrt</span>(pest_data<span class="op">$</span>total_sq_foot<span class="op">/</span><span class="fl">1e4</span>),
+  <span class="dt">live_in_super =</span> pest_data<span class="op">$</span>live_in_super
+)
+
+<span class="co"># Sampling from the posterior distribution</span>
+fitted_model_NB_multi &lt;-<span class="st"> </span><span class="kw">sampling</span>(
+  <span class="dt">object =</span> multi_NB_reg_comp,
+  <span class="dt">data =</span> pest_data_list_multi,
+  <span class="dt">warmup =</span> 1000L,
+  <span class="dt">iter =</span> 2000L,
+  <span class="dt">chains =</span> 4L,
+  <span class="dt">seed =</span> mcmc_seed
+)</code></pre></div>
+<p>Let’s now perform some posterior predictive checks. First we compare distribution of observed data with the distributions of replicated data from the fitted model</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Get replicated data</span>
+y_rep &lt;-<span class="st"> </span><span class="kw">as.matrix</span>(
+  fitted_model_NB_multi,
+  <span class="dt">pars =</span> <span class="kw">c</span>(<span class="st">&quot;y_rep&quot;</span>)
+)
+
+<span class="co"># Compare the distributions</span>
+<span class="kw">ppc_dens_overlay</span>(
+  <span class="dt">y =</span> pest_data<span class="op">$</span>complaints,
+  <span class="dt">yrep =</span> y_rep[<span class="dv">1</span><span class="op">:</span><span class="dv">200</span>, ]
+)</code></pre></div>
+<p><img src="BDA_STAN_Pavia_files/figure-html/unnamed-chunk-31-1.png" width="672" /></p>
+<p>The proportion of zeros</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Function that computes the proportion of zeros</span>
+prop_zero_fun &lt;-<span class="st"> </span><span class="cf">function</span>(x) <span class="kw">mean</span>(x <span class="op">==</span><span class="st"> </span><span class="dv">0</span>)
+
+<span class="co"># Compare the proportions</span>
+<span class="kw">ppc_stat</span>(
+  <span class="dt">y =</span> pest_data<span class="op">$</span>complaints,
+  <span class="dt">yrep =</span> y_rep[<span class="dv">1</span><span class="op">:</span><span class="dv">200</span>,],
+  <span class="dt">stat =</span> <span class="st">&quot;prop_zero_fun&quot;</span>
+)</code></pre></div>
+<p><img src="BDA_STAN_Pavia_files/figure-html/unnamed-chunk-32-1.png" width="672" /></p>
+<p>The observed number of complaints vs the expected number of complaints</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Comparison of observed and expected number of complaints</span>
+<span class="kw">ppc_rootogram</span>(
+  pest_data<span class="op">$</span>complaints,
+  <span class="dt">yrep =</span> y_rep
+)</code></pre></div>
+<p><img src="BDA_STAN_Pavia_files/figure-html/unnamed-chunk-33-1.png" width="672" /></p>
+<p>And the observed vs posterior predictive number of complaints given the number of traps.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ppc_intervals</span>(
+  <span class="dt">y =</span> pest_data<span class="op">$</span>complaints, 
+  <span class="dt">yrep =</span> y_rep,
+  <span class="dt">x =</span> pest_data<span class="op">$</span>traps
+) <span class="op">+</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">labs</span>(
+    <span class="dt">x =</span> <span class="st">&quot;Number of traps&quot;</span>, 
+    <span class="dt">y =</span> <span class="st">&quot;Number of complaints&quot;</span>
+  )</code></pre></div>
+<p><img src="BDA_STAN_Pavia_files/figure-html/unnamed-chunk-34-1.png" width="672" /></p>
+<p>The NB model had a better fit to the data than the poisson model.</p>
+<p>We have not fully considered the structure of our data, i.e. the observations are grouped into buildings. In such situations, it may be a good idea account for this, since the mean and the variance may not be constant for all observations (which are likely not <em>i.i.d.</em>).</p>
+<p>We can do posterior predictive checks comparing the observed and posterior predictive average number of complaints for each building.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ppc_stat_grouped</span>(
+  <span class="dt">y =</span> pest_data<span class="op">$</span>complaints,
+  <span class="dt">yrep =</span> y_rep,
+  <span class="dt">group =</span> pest_data<span class="op">$</span>building_id,
+  <span class="dt">stat =</span> <span class="st">&quot;mean&quot;</span>,
+  <span class="dt">binwidth =</span> <span class="fl">0.2</span>
+)</code></pre></div>
+<p><img src="BDA_STAN_Pavia_files/figure-html/unnamed-chunk-35-1.png" width="672" /></p>
+<p>As we can see, our model was not able to capture different variability for some buildings. We can try to model the variation across buldings.</p>
+</div>
+<div id="pest-control-example-hierarchical-model-varying-intercept" class="section level2">
+<h2><span class="header-section-number">3.2</span> Pest control example: hierarchical model (varying intercept)</h2>
+<p>We now relax the assumpionts of constant mean across all the buildings and allow for different different parameters (intercept or slope) across them. We can do this by fitting a hierarchical model, allowing the parameters of the model to vary by buildings.</p>
+<p>We can start by adding a varying intercept. The model can be formalized as follows:</p>
+<p><span class="math display">\[
+\text{complaints}_{b,t} \sim \text{Neg-Binomial}(\lambda_{b,t}, \phi) \\
+\lambda_{b,t}  = \exp{(\eta_{b,t})} \\
+\eta_{b,t} = \mu_b + \beta \, {\rm traps}_{b,t} + \beta_{\rm super}\, {\rm super}_b + \text{log_sq_foot}_b \\
+\mu_b \sim \text{Normal}(\alpha, \sigma_{\mu})
+\]</span></p>
+<p>In our Stan model, <span class="math inline">\(\mu_b\)</span> is the <span class="math inline">\(b\)</span>-th element of the vector <span class="math inline">\(\texttt{mu}\)</span> which has one element per building.</p>
+<p>We have one predictor that varies only by building. Thus, we can rewrite the above model more efficiently like so:</p>
+<p><span class="math display">\[
+\eta_{b,t} = \mu_b + \beta \, {\rm traps}_{b,t} + \text{log_sq_foot}_b\\
+\mu_b \sim \text{Normal}(\alpha +  \beta_{\text{super}} \, \text{super}_b , \sigma_{\mu})
+\]</span></p>
+<p>Moreovere, we can exploit the fact that in our data we have information at the building level, i.e. the average age of the residents, the average age of the buildings, and the average per-apartment monthly rent. We can store this information into a matrix that we will call <strong>bulding data</strong> that has one row per bulding and four columns, one for each bulding-level predictor:</p>
+<ul>
+<li><code>live_in_super</code></li>
+<li><code>age_of_building</code></li>
+<li><code>average_tentant_age</code></li>
+<li><code>monthly_average_rent</code></li>
+</ul>
+<p>We can now write our model as follows:</p>
+<p><span class="math display">\[
+\eta_{b,t} = \alpha_b + \beta \, {\rm traps} + \text{log_sq_foot}\\
+\mu \sim \text{Normal}(\alpha + \texttt{building_data} \, \zeta, \,\sigma_{\mu})
+\]</span></p>
+<div id="preparing-hierarchical-data-for-stan-program" class="section level3">
+<h3><span class="header-section-number">3.2.1</span> Preparing hierarchical data for Stan program</h3>
+<p>We have to prepare the data to pass to the Stan program.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">N_months &lt;-<span class="st"> </span><span class="kw">length</span>(<span class="kw">unique</span>(pest_data<span class="op">$</span>date))
+N_buildings &lt;-<span class="st"> </span><span class="kw">length</span>(<span class="kw">unique</span>(pest_data<span class="op">$</span>building_id))
+
+<span class="co"># Add some IDs for building and month</span>
+pest_data &lt;-<span class="st"> </span>pest_data <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">mutate</span>(
+    <span class="dt">building_fac =</span> <span class="kw">factor</span>(
+      building_id, 
+      <span class="dt">levels =</span> <span class="kw">unique</span>(building_id)
+    ),
+    <span class="dt">building_idx =</span> <span class="kw">as.integer</span>(building_fac),
+    <span class="dt">ids =</span> <span class="kw">rep</span>(
+      <span class="dv">1</span><span class="op">:</span>N_months, 
+      N_buildings
+    ),
+    <span class="co"># Create month id (use it later with autoregressive models)</span>
+    <span class="dt">mo_idx =</span> lubridate<span class="op">::</span><span class="kw">month</span>(date)
+  )
+
+<span class="co"># Center and rescale the building specific data</span>
+building_data &lt;-<span class="st"> </span>pest_data <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">select</span>(
+      building_idx,
+      live_in_super,
+      age_of_building,
+      total_sq_foot,
+      average_tenant_age,
+      monthly_average_rent
+    ) <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="co"># Select only one row per bulding (the other rows are identical)</span>
+<span class="st">    </span><span class="kw">unique</span>() <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="co"># Reorder by building_id (not mandatory)</span>
+<span class="st">    </span><span class="kw">arrange</span>(building_idx) <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">select</span>(<span class="op">-</span>building_idx) <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="co"># Subtract the mean from each variable</span>
+<span class="st">    </span><span class="kw">scale</span>(<span class="dt">scale=</span><span class="ot">FALSE</span>) <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">as.data.frame</span>() <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="co"># Scale the variables such that they are roughly on unit scale</span>
+<span class="st">    </span><span class="kw">mutate</span>( <span class="co"># scale by constants</span>
+      <span class="dt">age_of_building =</span> age_of_building <span class="op">/</span><span class="st"> </span><span class="dv">10</span>,
+      <span class="dt">total_sq_foot =</span> total_sq_foot <span class="op">/</span><span class="st"> </span><span class="dv">10000</span>,
+      <span class="dt">average_tenant_age =</span> average_tenant_age <span class="op">/</span><span class="st"> </span><span class="dv">10</span>,
+      <span class="dt">monthly_average_rent =</span> monthly_average_rent <span class="op">/</span><span class="st"> </span><span class="dv">1000</span>
+    ) <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">as.matrix</span>()
+
+<span class="co"># Make data list for Stan</span>
+stan_dat_hier &lt;-
+<span class="st">  </span><span class="kw">with</span>(pest_data,
+        <span class="kw">list</span>(<span class="dt">complaints =</span> complaints,
+             <span class="dt">traps =</span> traps,
+             <span class="dt">N =</span> <span class="kw">length</span>(traps),
+             <span class="dt">J =</span> N_buildings,
+             <span class="dt">M =</span> N_months,
+             <span class="dt">log_sq_foot =</span> <span class="kw">log</span>(pest_data<span class="op">$</span>total_sq_foot<span class="op">/</span><span class="fl">1e4</span>),
+             <span class="co"># Remove the log_sq_foot var (use it as exposure)</span>
+             <span class="dt">building_data =</span> building_data[, <span class="op">-</span><span class="dv">3</span>],
+             <span class="dt">mo_idx =</span> <span class="kw">as.integer</span>(<span class="kw">as.factor</span>(date)),
+             <span class="co"># K is the number of building-level predictors</span>
+             <span class="dt">K =</span> <span class="dv">4</span>,
+             <span class="dt">building_idx =</span> building_idx
+             )
+        )</code></pre></div>
+<p>We rescaled the variables such that they are roughly on the same scale to make the computational process more easy. In fact, the sampling algorithm is faster when variables are roughly on the same scale and on the unit scale.</p>
+</div>
+<div id="centered-parametrization" class="section level3">
+<h3><span class="header-section-number">3.2.2</span> Centered parametrization</h3>
+<p>Let’s see how the Stan program changes adding a varying intercept.</p>
+<pre><code>// Hierarchical multiple Negative Binomial model
+
+functions {
+  /*
+  * Alternative to neg_binomial_2_log_rng() that
+  * avoids potential numerical problems during warmup
+  */
+  int neg_binomial_2_log_safe_rng(real eta, real phi) {
+    real gamma_rate = gamma_rng(phi, phi / exp(eta));
+    if (gamma_rate &gt;= exp(20.79))
+      return -9;
+
+    return poisson_rng(gamma_rate);
+  }
+}
+
+data {
+  int&lt;lower = 1&gt; N;
+  int&lt;lower = 0&gt; complaints[N];
+  vector&lt;lower = 0&gt;[N] traps;
+  vector[N] log_sq_foot;
+
+  // Declare the hierarchical part
+  int&lt;lower = 1&gt; J;             // number of building
+  int&lt;lower = 1&gt; K;             // number of building variables
+  matrix[J, K] building_data;   // matrix of building data
+  int&lt;lower = 1, upper = J&gt; building_idx[N];  // id of the building
+}
+
+parameters {
+
+  real&lt;lower = 0&gt; inv_phi;  // inverse overdispersion&#39;s parameter
+  real beta;                // coefficient on traps
+  real alpha;               // intercept on the building
+  vector[J] mu;             // varying intercept of the building
+  real&lt;lower = 0&gt; sigma_mu; // sd of the varying intercept
+  vector[K] zeta;           // vector of coefficient of building vars
+}
+
+transformed parameters {
+  real phi = inv(inv_phi);  // get the original phi
+}
+
+model {
+
+  /*If you define the linear predictor outside of the likelihood,
+  you must specify it as the first object of the model block.*/
+
+  // Likelihood
+  vector[N] eta = mu[building_idx] +   // Loop over buildings
+                  beta * traps +
+                  log_sq_foot;
+
+  // complaints ~ neg_binomial_2_log(eta, phi);
+  target += neg_binomial_2_log_lpmf(complaints | eta, phi);
+
+  // Varying intercept on the building
+  // mu ~ normal(alpha + building_data * zeta, sigma_mu);
+  target += normal_lpdf(mu | alpha + building_data * zeta, sigma_mu);
+
+  // Priors on alpha, beta and inv_phi
+  // alpha ~ normal(log(4), 1);
+  // beta ~ normal(-0.25, 1);
+  // inv_phi ~ normal(0, 1);
+
+  target += normal_lpdf(alpha| log(4), 1) +
+            normal_lpdf(beta | -0.25, 1) +
+            normal_lpdf(inv_phi | 0, 1);
+
+
+  // Priors on the coefficients of buildings
+  // zeta ~ normal(0, 1);
+  // sigma_mu ~ normal(0, 1);
+
+  target += normal_lpdf(zeta | 0, 1) +
+            normal_lpdf(sigma_mu | 0, 1);
+
+}
+
+generated quantities {
+
+  int y_rep[N];
+
+  for (n in 1:N) {
+
+    // Define linear predictor into the loop as a temporary real number
+    real eta_rep = mu[building_idx[n]] +
+                   beta * traps[n] +
+                   log_sq_foot[n];
+
+     y_rep[n] = neg_binomial_2_log_safe_rng(eta_rep, phi);
+
+  }
+
+}
+</code></pre>
+<p>We declared in the <em>data block</em> the structure of the building-level matrix and we added in the <em>parameters</em> block the parameters <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\sigma_{mu}\)</span> of the distribution of the intercepts and the vector “<em>zeta</em>” of the coefficients of the building-level predictors. We also declared in the <strong>model</strong> block the contribution to the likelihood of the building-level information. Moreover, we added the term <code>mu[building_idx]</code> both in the <strong>model</strong> and <strong>generated quantities</strong> blocks, which tells to Stan to create a vector <code>eta</code> (linear predictor) with a different intercept for each building, that are identified by their <em>id number</em> (declared as <code>[building_idx]</code>) in the code.</p>
+<p>Now let’s fit the model to the data</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Compile the model</span>
+hier_neg_bin_comp &lt;-<span class="st"> </span><span class="kw">stan_model</span>(
+  <span class="dt">file =</span> <span class="st">&quot;stan_programs/hier_multiple_neg_bin.stan&quot;</span>
+)
+
+<span class="co"># Sampling from the posterior</span>
+fitted_model_NB_hier &lt;-<span class="st"> </span><span class="kw">sampling</span>(
+  hier_neg_bin_comp,
+  <span class="dt">data =</span> stan_dat_hier,
+  <span class="dt">warmup =</span> 1000L,
+  <span class="dt">iter =</span> 2000L,
+  <span class="dt">chains =</span> 4L,       
+  <span class="dt">seed =</span> mcmc_seed
+)</code></pre></div>
+<p>What are all the warnings from Stan? What are <strong>divergent transitions</strong>?</p>
+<p>If the Markov chains were not able to explore some regions of the posterior distribution, Stan will return some warnings which tell us that the trajectories of the Markov chains diverged and could not explore some sets of the posterior. When the chains were not able to explore all the regions of the posterior it is not recommended to use such model to do inference. In such situations, we should evaluate the patological behaviors of the algorithm and try to reparametrize the model in order to help the posterior surface exploration.</p>
+<p>We can diagnose the problems faced by the chains during the sampling, by looking when and in which regions of the posterior the chains diverged. We can inspect this issues using <strong>bayesplot</strong> R package, the same we used to do posterior predictive checks.</p>
+<p>Let’s first examine the summaries of the parameters of the model.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Extract the fit of the model</span>
+post_NB_hier &lt;-<span class="st"> </span>rstan<span class="op">::</span><span class="kw">extract</span>(fitted_model_NB_hier)
+
+<span class="co"># Print posterior summaries of the most interest parameters</span>
+<span class="kw">print</span>(
+  fitted_model_NB_hier,
+  <span class="dt">pars =</span> <span class="kw">c</span>(
+    <span class="st">&quot;alpha&quot;</span>,
+    <span class="st">&quot;beta&quot;</span>,
+    <span class="st">&quot;phi&quot;</span>,
+    <span class="st">&quot;mu&quot;</span>,
+    <span class="st">&quot;sigma_mu&quot;</span>
+  )
+)</code></pre></div>
+<pre><code>#&gt; Inference for Stan model: hier_multiple_neg_bin.
+#&gt; 4 chains, each with iter=2000; warmup=1000; thin=1; 
+#&gt; post-warmup draws per chain=1000, total post-warmup draws=4000.
+#&gt; 
+#&gt;           mean se_mean   sd  2.5%   25%   50%   75% 97.5% n_eff Rhat
+#&gt; alpha     1.26    0.02 0.43  0.40  1.00  1.27  1.54  2.09   548 1.01
+#&gt; beta     -0.23    0.00 0.06 -0.35 -0.27 -0.23 -0.19 -0.11   560 1.01
+#&gt; phi       1.58    0.01 0.35  1.01  1.34  1.53  1.78  2.40   572 1.01
+#&gt; mu[1]     1.27    0.02 0.55  0.16  0.93  1.27  1.63  2.36   598 1.01
+#&gt; mu[2]     1.23    0.02 0.53  0.20  0.91  1.22  1.57  2.28   615 1.00
+#&gt; mu[3]     1.43    0.02 0.47  0.49  1.12  1.43  1.73  2.39   683 1.00
+#&gt; mu[4]     1.46    0.02 0.48  0.50  1.15  1.46  1.76  2.40   618 1.01
+#&gt; mu[5]     1.08    0.02 0.43  0.21  0.81  1.09  1.38  1.93   621 1.01
+#&gt; mu[6]     1.16    0.02 0.48  0.19  0.86  1.19  1.48  2.07   621 1.01
+#&gt; mu[7]     1.48    0.02 0.52  0.42  1.15  1.47  1.83  2.48   572 1.01
+#&gt; mu[8]     1.25    0.02 0.42  0.46  0.97  1.24  1.53  2.11   786 1.00
+#&gt; mu[9]     1.40    0.02 0.56  0.24  1.04  1.43  1.76  2.49   628 1.01
+#&gt; mu[10]    0.86    0.01 0.37  0.15  0.62  0.85  1.10  1.64   721 1.00
+#&gt; sigma_mu  0.27    0.01 0.17  0.07  0.15  0.24  0.36  0.69   453 1.01
+#&gt; 
+#&gt; Samples were drawn using NUTS(diag_e) at Mon Sep 17 20:13:19 2018.
+#&gt; For each parameter, n_eff is a crude measure of effective sample size,
+#&gt; and Rhat is the potential scale reduction factor on split chains (at 
+#&gt; convergence, Rhat=1).</code></pre>
+<p>The <strong>effective sample size</strong> (column <code>n_eff</code>) and the <strong><span class="math inline">\(\widehat{R}\)</span></strong> (column <code>Rhat</code>) are useful indicators of the goodness of the sampling.</p>
+<ul>
+<li><p><strong>Effective sample size</strong>. When the algorithm run a chain to sample from the posterior, every sample at each iteration can depend from the sample drawn from the previous iteration one. If the samples were totally indepedent, the error in exploring the posterior would be negligible as the square of the number of iteration increases. The effective sample size represents the number of samples from the posterior that are actually independent. Thus, high number of effective sample size means that the Markov Chain has less dependence from one state to the other and it is able to better move around the surface of the posterior.</p></li>
+<li><p><strong><span class="math inline">\(\widehat{R}\)</span></strong>. The potential scale reduction statistics split-<span class="math inline">\(\widehat{R}\)</span> measures the ratio of the average variances of draws within each chain to the variance of pooled draws across chains. It is an indicator of the equilibrium of the chains. If all the chains are at equilibrium, then <strong><span class="math inline">\(\widehat{R}\)</span></strong> will converge to <span class="math inline">\(1\)</span>. If chains did not converge to a common distribution, then <strong><span class="math inline">\(\widehat{R}\)</span></strong> will be greated then <span class="math inline">\(1\)</span>.</p></li>
+</ul>
+<p>While <strong><span class="math inline">\(\widehat{R}\)</span></strong> is only slightly greater than <span class="math inline">\(1\)</span> for not all the parameters, low values of the effective sample sizes mean that a lot of drawns from the posterior were dependent from each other.</p>
+<p>We can look at the traceplot the see if the divergences form a pattern.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># use as.array to keep the markov chains separate for trace plots</span>
+<span class="kw">mcmc_trace</span>(
+  <span class="kw">as.array</span>(
+    fitted_model_NB_hier, 
+    <span class="dt">pars =</span> <span class="st">&#39;sigma_mu&#39;</span>
+  ),
+  <span class="dt">np =</span> <span class="kw">nuts_params</span>(fitted_model_NB_hier),
+  <span class="dt">window =</span> <span class="kw">c</span>(<span class="dv">500</span>,<span class="dv">1000</span>)
+)</code></pre></div>
+<p><img src="BDA_STAN_Pavia_files/figure-html/unnamed-chunk-39-1.png" width="672" /></p>
+<p>The divergent parameters are highlighted with the red bars underneath the traceplots. For such samples, the sampler got stucked at the same parameter value of <span class="math inline">\(\sigma_\mu\)</span>.</p>
+<p>We can plot the bivariate distribution of one of the varying intecepts vs <span class="math inline">\(\sigma_\mu\)</span> (here we use the logarithm of <span class="math inline">\(\sigma_\mu\)</span> the better visualize the distribution).</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># assign to object so we can compare to another plot later</span>
+scatter_with_divs &lt;-<span class="st"> </span><span class="kw">mcmc_scatter</span>(
+  <span class="kw">as.array</span>(fitted_model_NB_hier),
+  <span class="dt">pars =</span> <span class="kw">c</span>(
+    <span class="st">&quot;mu[4]&quot;</span>, 
+    <span class="st">&#39;sigma_mu&#39;</span>
+  ),
+  <span class="dt">transform =</span> <span class="kw">list</span>(<span class="st">&#39;sigma_mu&#39;</span> =<span class="st"> &quot;log&quot;</span>),
+  <span class="dt">np =</span> <span class="kw">nuts_params</span>(fitted_model_NB_hier)
+)
+
+scatter_with_divs</code></pre></div>
+<p><img src="BDA_STAN_Pavia_files/figure-html/unnamed-chunk-40-1.png" width="672" /></p>
+<p>By looking at the plot above, it seems that divergent transitions mostly occured at the bottom of the distributions.</p>
+<p>Let’s now look at the prior bivariate distribution to try to understand why divergent transitions were mostly concentrated in the same region of the posterior.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Simulate from the prior distributions ------------------------------</span>
+<span class="co"># Number of simulations and vector of the parameters</span>
+N_sims &lt;-<span class="st"> </span><span class="dv">1000</span>
+log_sigma &lt;-<span class="st"> </span><span class="kw">rep</span>(<span class="ot">NA</span>, N_sims)
+mu &lt;-<span class="st"> </span><span class="kw">rep</span>(<span class="ot">NA</span>, N_sims)
+
+<span class="co"># Draw from the prior</span>
+<span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>N_sims) {
+  log_sigma[j] &lt;-<span class="st"> </span><span class="kw">rnorm</span>(<span class="dv">1</span>, <span class="dt">mean =</span> <span class="dv">0</span>, <span class="dt">sd =</span> <span class="dv">1</span>)
+  mu[j] &lt;-<span class="st"> </span><span class="kw">rnorm</span>(<span class="dv">1</span>, <span class="dt">mean =</span> <span class="dv">0</span>, <span class="dt">sd =</span> <span class="kw">exp</span>(log_sigma[j]))
+}
+
+<span class="co"># Bind the vector of draws</span>
+draws &lt;-<span class="st"> </span><span class="kw">cbind</span>(
+  <span class="st">&quot;mu&quot;</span> =<span class="st"> </span>mu, 
+  <span class="st">&quot;log(sigma_mu)&quot;</span> =<span class="st"> </span>log_sigma
+)
+
+<span class="co"># Plot the bivariate prior distributions</span>
+<span class="kw">mcmc_scatter</span>(draws)</code></pre></div>
+<p><img src="BDA_STAN_Pavia_files/figure-html/unnamed-chunk-41-1.png" width="672" /></p>
+<p>As we can see, the bivariate prior looks like a funnel as long as both <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\sigma_{\mu}\)</span> approach <span class="math inline">\(0\)</span>. If the data were informative, we wouldn’t expect such a shape of the posterior. Given that our data are very noisy, it is very likely that the posterior will look similar to the prior. Indeed, the divergent transitions mostly occured in the steepest region of the posterior, where the funnel becomes very narrow. Such geometry of the posterior are very difficult to explore for the sampler.</p>
+<p>Here’s another way to look at the divergent transitions for each pair of <span class="math inline">\(\sigma_{\mu}\)</span> and <span class="math inline">\(\mu_{b}\)</span>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">parcoord_with_divs &lt;-<span class="st"> </span><span class="kw">mcmc_parcoord</span>(
+  <span class="kw">as.array</span>(
+    fitted_model_NB_hier, 
+    <span class="dt">pars =</span> <span class="kw">c</span>(<span class="st">&quot;sigma_mu&quot;</span>, <span class="st">&quot;mu&quot;</span>)
+  ),
+  <span class="dt">np =</span> <span class="kw">nuts_params</span>(fitted_model_NB_hier)
+)
+
+parcoord_with_divs</code></pre></div>
+<p><img src="BDA_STAN_Pavia_files/figure-html/unnamed-chunk-42-1.png" width="672" /></p>
+<p>How can we deal with these issues?</p>
+<p>We will see later that a simple reparametrization of the model can highly help the sampler to fully explore the surface of the posterior distribution.</p>
+</div>
+<div id="non-centered-parametrization" class="section level3">
+<h3><span class="header-section-number">3.2.3</span> Non-centered parametrization</h3>
+<p>We can fix these problems by reparametrizing the distribution of <span class="math inline">\(mu\)</span>, the one that causes the divergent transitions of the chains. In particular, we can use the <strong>non-centered parametrization</strong>. Given that the distribution of <span class="math inline">\(mu\)</span> has been specified as follows:</p>
+<span class="math display">\[\begin{equation}
+
+\mu_{b} \sim N \left( \alpha + \text{building_data} \zeta, \sigma_{\mu} \right)
+
+\end{equation}\]</span>
+<p>we can multiply <span class="math inline">\(\sigma_{\mu}\)</span> by an auxiliary variable as:</p>
+<span class="math display">\[\begin{equation}
+
+\sigma_{\mu} = \sigma_{\mu} * \mu_{raw}
+
+\end{equation}\]</span>
+<p>This auxiliary variable <span class="math inline">\(\mu_{raw}\)</span> decouples the depence between the density of <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\sigma_{mu}\)</span> without changing the distribution of <span class="math inline">\(\mu_{b}\)</span>. We can modifiy the Stan program as follows:</p>
+<pre><code>// Hierarchical multiple Negative Binomial model
+
+functions {
+  /*
+  * Alternative to neg_binomial_2_log_rng() that
+  * avoids potential numerical problems during warmup
+  */
+  int neg_binomial_2_log_safe_rng(real eta, real phi) {
+    real gamma_rate = gamma_rng(phi, phi / exp(eta));
+    if (gamma_rate &gt;= exp(20.79))
+      return -9;
+
+    return poisson_rng(gamma_rate);
+  }
+}
+
+data {
+  int&lt;lower = 1&gt; N;
+  int&lt;lower = 0&gt; complaints[N];
+  vector&lt;lower = 0&gt;[N] traps;
+  vector[N] log_sq_foot;
+
+  // Declare the hierarchical part
+  int&lt;lower = 1&gt; J;             // number of building
+  int&lt;lower = 1&gt; K;             // number of building variables
+  matrix[J, K] building_data;   // matrix of building data
+  int&lt;lower = 1, upper = J&gt; building_idx[N];  // id of the building
+}
+
+parameters {
+
+  real&lt;lower = 0&gt; inv_phi;  // inverse overdispersion&#39;s parameter
+  real beta;                // coefficient on traps
+  real alpha;               // intercept on the building
+  vector[J] mu_raw;         // auxiliary parameter
+  real&lt;lower = 0&gt; sigma_mu; // sd of the varying intercept
+  vector[K] zeta;           // vector of coefficient of building vars
+}
+
+transformed parameters {
+
+  // get the original phi
+  real phi = inv(inv_phi);
+
+  // get the original parameter of the varying intercept
+  vector[J] mu = alpha + building_data * zeta + sigma_mu * mu_raw;
+}
+
+model {
+
+  /*If you define the linear predictor outside of the likelihood,
+  you must specify it as the first object of the model block.*/
+
+  // Likelihood
+  vector[N] eta = mu[building_idx] +   // Loop over buildings
+                  beta * traps +
+                  log_sq_foot;
+
+  // complaints ~ neg_binomial_2_log(eta, phi);
+  target += neg_binomial_2_log_lpmf(complaints | eta, phi);
+
+  // Priors on alpha, beta and inv_phi
+  // alpha ~ normal(log(4), 1);
+  // beta ~ normal(-0.25, 1);
+  // inv_phi ~ normal(0, 1);
+
+  target += normal_lpdf(alpha| log(4), 1) +
+            normal_lpdf(beta | -0.25, 1) +
+            normal_lpdf(inv_phi | 0, 1);
+
+  // Priors on the coefficients of buildings
+  // zeta ~ normal(0, 1);
+  // sigma_mu ~ normal(0, 1);
+
+  target += normal_lpdf(zeta | 0, 1) +
+            normal_lpdf(mu_raw| 0, 1) +
+            normal_lpdf(sigma_mu | 0, 1);
+}
+
+generated quantities {
+
+  int y_rep[N];
+
+  for (n in 1:N) {
+
+    // Define linear predictor into the loop as a temporary real number
+    real eta_rep = mu[building_idx[n]] +
+                   beta * traps[n] +
+                   log_sq_foot[n];
+
+     y_rep[n] = neg_binomial_2_log_safe_rng(eta_rep, phi);
+
+  }
+
+}
+</code></pre>
+<p>We now fit the model and look at the effective sample size.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Compile the model</span>
+hier_neg_bin_ncp_comp &lt;-<span class="st"> </span><span class="kw">stan_model</span>(
+  <span class="dt">file =</span> <span class="st">&quot;stan_programs/hier_multiple_neg_bin_ncp.stan&quot;</span>
+)
+
+<span class="co"># Sampling from the posterior</span>
+fitted_model_NB_hier_ncp &lt;-<span class="st"> </span><span class="kw">sampling</span>(
+  hier_neg_bin_ncp_comp,
+  <span class="dt">data =</span> stan_dat_hier,
+  <span class="dt">warmup =</span> 1000L,
+  <span class="dt">iter =</span> 2000L,
+  <span class="dt">chains =</span> 4L,       <span class="co"># 1 chain for a quick sampling</span>
+  <span class="dt">seed =</span> mcmc_seed
+)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(
+  fitted_model_NB_hier_ncp, 
+  <span class="dt">pars =</span> <span class="kw">c</span>(<span class="st">&#39;sigma_mu&#39;</span>,<span class="st">&#39;beta&#39;</span>,<span class="st">&#39;alpha&#39;</span>,<span class="st">&#39;phi&#39;</span>,<span class="st">&#39;mu&#39;</span>)
+)</code></pre></div>
+<pre><code>#&gt; Inference for Stan model: hier_multiple_neg_bin_ncp.
+#&gt; 4 chains, each with iter=2000; warmup=1000; thin=1; 
+#&gt; post-warmup draws per chain=1000, total post-warmup draws=4000.
+#&gt; 
+#&gt;           mean se_mean   sd  2.5%   25%   50%   75% 97.5% n_eff Rhat
+#&gt; sigma_mu  0.24    0.01 0.18  0.01  0.11  0.21  0.33  0.68  1173    1
+#&gt; beta     -0.23    0.00 0.06 -0.35 -0.27 -0.23 -0.19 -0.11  2644    1
+#&gt; alpha     1.27    0.01 0.43  0.42  0.99  1.27  1.56  2.10  2620    1
+#&gt; phi       1.58    0.01 0.36  1.00  1.33  1.54  1.80  2.38  4000    1
+#&gt; mu[1]     1.30    0.01 0.54  0.20  0.96  1.31  1.65  2.39  2665    1
+#&gt; mu[2]     1.25    0.01 0.52  0.19  0.92  1.26  1.58  2.28  2726    1
+#&gt; mu[3]     1.41    0.01 0.48  0.48  1.08  1.41  1.73  2.37  2929    1
+#&gt; mu[4]     1.45    0.01 0.48  0.52  1.13  1.45  1.77  2.39  2908    1
+#&gt; mu[5]     1.08    0.01 0.41  0.26  0.82  1.08  1.35  1.88  3223    1
+#&gt; mu[6]     1.19    0.01 0.48  0.24  0.88  1.19  1.51  2.12  2626    1
+#&gt; mu[7]     1.47    0.01 0.51  0.45  1.13  1.47  1.82  2.47  2859    1
+#&gt; mu[8]     1.26    0.01 0.42  0.45  0.98  1.25  1.54  2.09  3377    1
+#&gt; mu[9]     1.43    0.01 0.56  0.28  1.07  1.44  1.81  2.51  2845    1
+#&gt; mu[10]    0.86    0.01 0.37  0.15  0.63  0.86  1.10  1.62  4000    1
+#&gt; 
+#&gt; Samples were drawn using NUTS(diag_e) at Mon Sep 17 20:14:04 2018.
+#&gt; For each parameter, n_eff is a crude measure of effective sample size,
+#&gt; and Rhat is the potential scale reduction factor on split chains (at 
+#&gt; convergence, Rhat=1).</code></pre>
+<p>The number of the effective sample size is greater, meaning that the sampler had less difficult during the exploration of the posterior.</p>
+<p>Let’s compare the posterior of models with centered and non-centered parametrization.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">scatter_no_divs &lt;-<span class="st"> </span><span class="kw">mcmc_scatter</span>(
+  <span class="kw">as.array</span>(fitted_model_NB_hier_ncp),
+  <span class="dt">pars =</span> <span class="kw">c</span>(
+    <span class="st">&quot;mu[4]&quot;</span>, 
+    <span class="st">&#39;sigma_mu&#39;</span>
+  ),
+  <span class="dt">transform =</span> <span class="kw">list</span>(<span class="st">&#39;sigma_mu&#39;</span> =<span class="st"> &quot;log&quot;</span>),
+  <span class="dt">np =</span> <span class="kw">nuts_params</span>(fitted_model_NB_hier_ncp)
+)
+
+<span class="kw">bayesplot_grid</span>(
+  scatter_with_divs, 
+  scatter_no_divs,
+  <span class="dt">grid_args =</span> <span class="kw">list</span>(<span class="dt">ncol =</span> <span class="dv">2</span>), 
+  <span class="dt">ylim =</span> <span class="kw">c</span>(<span class="op">-</span><span class="dv">11</span>, <span class="dv">1</span>)
+)</code></pre></div>
+<p><img src="BDA_STAN_Pavia_files/figure-html/unnamed-chunk-45-1.png" width="672" /></p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">parcoord_no_divs &lt;-<span class="st"> </span><span class="kw">mcmc_parcoord</span>(
+  <span class="kw">as.array</span>(
+    fitted_model_NB_hier_ncp, 
+    <span class="dt">pars =</span> <span class="kw">c</span>(<span class="st">&quot;sigma_mu&quot;</span>, <span class="st">&quot;mu&quot;</span>)
+  ),
+  <span class="dt">np =</span> <span class="kw">nuts_params</span>(fitted_model_NB_hier_ncp)
+)
+
+<span class="kw">bayesplot_grid</span>(
+  parcoord_with_divs, 
+  parcoord_no_divs,
+  <span class="dt">ylim =</span> <span class="kw">c</span>(<span class="op">-</span><span class="dv">3</span>, <span class="dv">3</span>)
+)</code></pre></div>
+<p><img src="BDA_STAN_Pavia_files/figure-html/unnamed-chunk-46-1.png" width="672" /></p>
+<p>The sampler explore the posterior of the parameter <span class="math inline">\(\mu_{raw}\)</span>, which has a more isotropic geometry. In such a way, it was able to recover also the region of the posterior not previously explored.</p>
+<p>Now let’s extract the posterior predictive values and do posterior predictive checks.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Get posterior predictive values</span>
+post_hier_NB_ncp &lt;-<span class="st"> </span>rstan<span class="op">::</span><span class="kw">extract</span>(
+  fitted_model_NB_hier_ncp, 
+  <span class="dt">pars =</span> <span class="kw">c</span>(<span class="st">&#39;y_rep&#39;</span>,<span class="st">&#39;inv_phi&#39;</span>)
+)
+
+y_rep &lt;-<span class="st"> </span><span class="kw">as.matrix</span>(
+  fitted_model_NB_hier_ncp, 
+  <span class="dt">pars =</span> <span class="st">&quot;y_rep&quot;</span>
+)
+
+<span class="kw">ppc_dens_overlay</span>(
+  stan_dat_hier<span class="op">$</span>complaints, 
+  y_rep[<span class="dv">1</span><span class="op">:</span><span class="dv">200</span>,]
+)</code></pre></div>
+<p><img src="BDA_STAN_Pavia_files/figure-html/unnamed-chunk-47-1.png" width="672" /></p>
+<p>The posterior predicted replicates better resemble the distribution of the observed data. Let’s compare the average number of complaints across buldings,</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ppc_stat_grouped</span>(
+  <span class="dt">y =</span> stan_dat_hier<span class="op">$</span>complaints,
+  <span class="dt">yrep =</span> y_rep,
+  <span class="dt">group =</span> pest_data<span class="op">$</span>building_id,
+  <span class="dt">stat =</span> <span class="st">&#39;mean&#39;</span>,
+  <span class="dt">binwidth =</span> <span class="fl">0.5</span>
+)</code></pre></div>
+<p><img src="BDA_STAN_Pavia_files/figure-html/ppc-group_means-hier-1.png" width="672" /></p>
+<p>the standard deviations,</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ppc_stat_grouped</span>(
+  <span class="dt">y =</span> stan_dat_hier<span class="op">$</span>complaints,
+  <span class="dt">yrep =</span> y_rep,
+  <span class="dt">group =</span> pest_data<span class="op">$</span>building_id,
+  <span class="dt">stat =</span> <span class="st">&#39;sd&#39;</span>,
+  <span class="dt">binwidth =</span> <span class="fl">0.5</span>
+)</code></pre></div>
+<p><img src="BDA_STAN_Pavia_files/figure-html/unnamed-chunk-48-1.png" width="672" /></p>
+<p>and the proportion of zeros.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ppc_stat_grouped</span>(
+  <span class="dt">y =</span> stan_dat_hier<span class="op">$</span>complaints,
+  <span class="dt">yrep =</span> y_rep,
+  <span class="dt">group =</span> pest_data<span class="op">$</span>building_id,
+  <span class="dt">stat =</span> <span class="st">&#39;prop_zero_fun&#39;</span>,
+  <span class="dt">binwidth =</span> <span class="fl">0.05</span>
+  )</code></pre></div>
+<p><img src="BDA_STAN_Pavia_files/figure-html/unnamed-chunk-49-1.png" width="672" /></p>
+<p>We can see that the model tends to overestimate the proportion of zero complaints for building “47”. It is possible that we have very noisy data for building “47” and we cannot estimate precisely the distribution of the outcome variable for that building. Thus, the model tends to be conservative and shrinks the posterior predictive values to the common estimate of a general building.</p>
+
+</div>
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="day2.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="day4.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"google": false,
+"linkedin": false,
+"weibo": false,
+"instapper": false,
+"vk": false,
+"all": ["facebook", "google", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"download": null,
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "";
+    if (src === "" || src === "true") src = "https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:" && /^https?:/.test(src))
+      src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>
